@@ -28,7 +28,8 @@ public class MyPreProcessMain {
 		String tokenModel = "./data/Model/en-token.bin"; // Token model.
 		String providedCV = null;
 		String tweetdir = "./data/tweets/";
-		String iat = "./data/RaceIATCountyAgg.csv";
+		String raceTrain = "./data/RaceIATCountyAgg.csv";
+		String raceTest = "./data/";
 		
 //		String providedCV = String.format("/if15/lg5bt/DataSigir/%s/SelectedVocab.csv", dataset); // CV.
 //		String userFolder = String.format("/if15/lg5bt/DataSigir/%s/Users", dataset);
