@@ -28,57 +28,32 @@ public class MyPreProcessMain {
 		String tokenModel = "./data/Model/en-token.bin"; // Token model.
 		String providedCV = null;
 		String tweetdir = "./data/tweets/";
-		String raceTrain = "./data/RaceIATCountyAgg.csv";
-		String raceTest = "./data/";
-		
-//		String providedCV = String.format("/if15/lg5bt/DataSigir/%s/SelectedVocab.csv", dataset); // CV.
-//		String userFolder = String.format("/if15/lg5bt/DataSigir/%s/Users", dataset);
-//		String featureGroupFile = String.format("/if15/lg5bt/DataSigir/%s/CrossGroups_800.txt", dataset);
-//		String featureGroupFileB = String.format("/if15/lg5bt/DataSigir/%s/CrossGroups_800.txt", dataset);
-//		String globalModel = String.format("/if15/lg5bt/DataSigir/%s/GlobalWeights.txt", dataset);
-
-		/**Feature selection**/
-		double startProb = 0.2; // Used in feature selection, the starting point of the features.
-		double endProb = 1; // Used in feature selection, the ending point of the features.
-		int maxDF = -1, minDF = 20; // Filter the features with DFs smaller than this threshold.
 
 		String stopwords = "./data/Model/stopwords.dat";
 		String blackFv = "./data/black_features.txt";
 		String gayFv = "./data/gay_features.txt";
 
-		// Analyzer for feature selection.
-		UserAnalyzer analyzer = new UserAnalyzer(tokenModel, classNumber, null, Ngram, lengthThreshold, false);
-		analyzer.LoadStopwords(stopwords);
-		analyzer.loadCV(gayFv);
-		analyzer.loadUserDir(tweetdir);
-//		analyzer.loadIAT(iat);
-//		analyzer.saveTweets("./data/vct/");
-		
-		
-//		analyzer.loadSeedWords();
-//		analyzer.featureSelection(fvFile, "DF", startProb, endProb, maxDF, minDF);
-
-//		// Feature selection for language model.
-//		analyzer.LoadStopwords(stopwords);
-//		analyzer.loadUserDir(trainDir);
-//		analyzer.featureSelection(fvFile4LM, "DF", maxDF, minDF, lmTopK);
-//		// Feature selection for logistic model.
-//		analyzer.featureSelection(fvFile, fs1, fs2, maxDF, minDF, lrTopK);
-//
-//		// Analyzer for training global model.
-//		UserAnalyzer analyzer = new UserAnalyzer(tokenModel, classNumber, fvFile, Ngram, lengthThreshold, true);
-//		analyzer.loadUserDir(trainDir);
-//		/**Train Global model**/
-//		SVM svm = new SVM(classNumber, analyzer.getFeatureSize(), 1);
-//		svm.train(analyzer.mergeReviews());
-//		svm.saveModel(globalModel);
+//		/***Get statistics of the tweets of the seed words.*****/
+//		UserAnalyzer black_analyzer = new UserAnalyzer(tokenModel, classNumber, null, Ngram, lengthThreshold, false);
+//		black_analyzer.LoadStopwords(stopwords);
+//		black_analyzer.loadCV(blackFv);
+//		black_analyzer.loadUserDir(tweetdir);
 //		
-//		/**Cross feature groups**/
-//		int kFold = 5, kmeans = 200;
-//		String crossfv = String.format("./data/%s/CrossFeatures_%dk_%d_%d/", dataset, trainSize, kFold, kmeans);
-//		ArrayList<_Doc> crossDocs = (ArrayList<_Doc>) analyzer.mergeReviews();
-//		CrossFeatureSelection crossfs = new CrossFeatureSelection(crossDocs, classNumber, analyzer.getFeatureSize(), kFold, kmeans);
-//		crossfs.train();
-//		crossfs.kMeans(crossfv);
+//		UserAnalyzer gay_analyzer = new UserAnalyzer(tokenModel, classNumber, null, Ngram, lengthThreshold, false);
+//		gay_analyzer.LoadStopwords(stopwords);
+//		gay_analyzer.loadCV(gayFv);
+//		gay_analyzer.loadUserDir(tweetdir);
+		
+		/****split the tweets data into two folders: train and test.****/
+		String traindir = "./data/train/tweetsTrain/";
+		String testdir = "./data/test/tweetsTest/";
+		
+		UserAnalyzer analyzer = new UserAnalyzer(tokenModel, classNumber, null, Ngram, lengthThreshold, false);
+		analyzer.splitData(tweetdir, traindir, testdir);
+		
+		/**Feature selection**/
+		double startProb = 0.2; // Used in feature selection, the starting point of the features.
+		double endProb = 1; // Used in feature selection, the ending point of the features.
+		int maxDF = -1, minDF = 20; // Filter the features with DFs smaller than this threshold.
 	}
 }

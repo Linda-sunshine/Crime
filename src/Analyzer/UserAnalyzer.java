@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -283,9 +284,86 @@ public class UserAnalyzer extends DocAnalyzer {
 		return rvws;
 	}
 	
-//	// save collected tweets.
-//	public void saveTweets(String dir){
-//		for(_User u: m_users){
-//			
-//		}
+	// Split the twitter data into half as training and half as testing.
+	public void splitData(String folder, String traindir, String testdir){
+		long t1 = System.currentTimeMillis();
+		int count = 0;
+		if(folder == null || folder.isEmpty())
+				return;
+		File dir = new File(folder);
+		for(File f: dir.listFiles()){
+			if(f.isFile() && f.getAbsolutePath().endsWith(".csv")){
+				splitUser(f.getAbsolutePath(), traindir, testdir);
+				count++;
+				if(count%10 == 0)
+					System.out.print(".");
+				} else if (f.isDirectory())
+					loadUserDir(f.getAbsolutePath());
+		}
+			
+		long t2 = System.currentTimeMillis();
+		t2 -= t1;
+		t2 /= 1000;
+		System.out.println(t2 + " secs are used to load the tweets.");
+		System.out.format("%d counties of tweets are splitted from %s...\n", count, folder);
 	}
+	
+	// split the tweets of one county into two parts.
+	public void splitUser(String filename, String traindir, String testdir){
+		try {
+			File file = new File(filename);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+			String line;			
+			
+			String countyID = extractUserID(file.getName()); //UserId is contained in the filename.
+			String trainfile = traindir + countyID + ".csv";
+			String testfile = testdir + countyID + ".csv";
+			PrintWriter trainWriter = new PrintWriter(new File(trainfile));
+			PrintWriter testWriter = new PrintWriter(new File(testfile));
+			int trainCount = 0, testCount = 0;
+			// Skip the first line since it is user name.
+			reader.readLine(); 
+	
+			// Read Raw tweets.
+			ArrayList<String> rawTweets = new ArrayList<String>();
+			HashSet<Integer> trainIndexes = new HashSet<Integer>();
+			while((line = reader.readLine()) != null){
+				rawTweets.add(line);
+			}
+			
+			// If the tweets size is too small, it is hard to get half of them randomly.
+			if(rawTweets.size() < 100){
+				for(int i=0; i<rawTweets.size(); i+=2){
+					trainWriter.write(rawTweets.get(i)+"\n");
+					if(i+1 < rawTweets.size())
+						testWriter.write(rawTweets.get(i+1)+"\n");
+				}
+				trainCount = rawTweets.size()/2;
+				testCount = rawTweets.size() - trainCount;
+			} else{
+				boolean[] trainFlags = new boolean[rawTweets.size()];
+				// select random tweets as the training data
+				while(trainIndexes.size() < rawTweets.size()/2){
+					int index = (int)(Math.random()*rawTweets.size());
+					trainIndexes.add(index);
+					trainFlags[index] = true;
+				}
+				for(int i=0; i<trainFlags.length; i++){
+					if(trainFlags[i])
+						trainWriter.write(rawTweets.get(i)+"\n");
+					else
+						testWriter.write(rawTweets.get(i)+"\n");
+				}
+				trainCount = trainIndexes.size();
+				testCount = rawTweets.size() - trainCount;
+			}
+			System.out.println(String.format("%s\ttrain\t%d\ttest\t%d\n", countyID, trainCount, testCount));
+			reader.close();
+			trainWriter.close();
+			testWriter.close();
+		} catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+	
+}
