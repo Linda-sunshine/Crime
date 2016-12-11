@@ -62,7 +62,7 @@ public class MultiThreadedUserAnalyzer extends UserAnalyzer {
 	
 	//Load all the users.
 	@Override
-	public void loadUserDir(String folder){
+	public void loadUserDir(String folder, String suffix){
 		if(folder == null || folder.isEmpty())
 			return;
 		File dir = new File(folder);
@@ -107,7 +107,7 @@ public class MultiThreadedUserAnalyzer extends UserAnalyzer {
 		int count=0;
 		for(File f:files ) 
 			if (f.isDirectory())
-				loadUserDir(f.getAbsolutePath());
+				loadUserDir(f.getAbsolutePath(), suffix);
 			else{
 				count++;
 			}

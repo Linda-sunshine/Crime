@@ -309,6 +309,9 @@ public class _User {
 	public void setIATScore(double v){
 		m_iat = v;
 	}
+	public double getIATScore(){
+		return m_iat;
+	}
 	
 	// class demographics
 	public class Demographics{

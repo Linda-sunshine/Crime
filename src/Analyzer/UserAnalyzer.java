@@ -23,6 +23,8 @@ import structures._SparseFeature;
 import structures._User;
 import structures._stat;
 import utils.Utils;
+import weka.core.DenseInstance;
+import weka.core.Instance;
 
 /**
  * 
@@ -123,27 +125,28 @@ public class UserAnalyzer extends DocAnalyzer {
 	}
 	
 	//Load all the users.
-	public void loadUserDir(String folder){
+	public void loadUserDir(String folder, String suffix){
 		long t1 = System.currentTimeMillis();
-		int count = 0;
+		int fCount = 0;
 		if(folder == null || folder.isEmpty())
 			return;
 		File dir = new File(folder);
 		for(File f: dir.listFiles()){
-			if(f.isFile()){
+			if(f.isFile() && f.getAbsolutePath().endsWith(suffix)){
 				loadUser(f.getAbsolutePath());
-				count++;
-				if(count%10 == 0)
+				fCount++;
+				if(fCount%10 == 0)
 					System.out.print(".");
 			} else if (f.isDirectory())
-				loadUserDir(f.getAbsolutePath());
+				loadUserDir(f.getAbsolutePath(), suffix);
 		}
 		
 		long t2 = System.currentTimeMillis();
 		t2 -= t1;
 		t2 /= 1000;
+		System.out.println("---------------------------------------------");
 		System.out.println(t2 + " secs are used to load the users.");
-		System.out.format("%d users are loaded from %s...\n", count, folder);
+		System.out.format("%d/%d users are loaded from %s...\n", m_users.size(), fCount, folder);
 	}
 	
 	String extractUserID(String text) {
@@ -177,17 +180,24 @@ public class UserAnalyzer extends DocAnalyzer {
 					source = strs[3];
 					tweet = new _Review(m_corpus.getCollection().size(), source, 0, countyID);
 					
-					if(AnalyzeDoc(tweet)) //Create the sparse vector for the review.
-						tweets.add(tweet);	
+					if(AnalyzeDoc(tweet))//Create the sparse vector for the review.
+						tweets.add(tweet);
+					
 				}
 			}
-			if(tweets.size() > 0)
-				System.out.println(String.format("%d tweets are loaded from %s.\n", tweets.size(), filename));
-			
+			if(tweets.size() > 0){
+				System.out.print(String.format("---%s county has %d tweets containing seed words.---\n", countyID, tweets.size()));
+//				for(_Review t: tweets)
+//					System.out.println(t.getSource());
+			}
 			if(tweets.size() >= 1){//at least one for adaptation and one for testing
-				_User cur = new _User(countyID, m_classNo, tweets);
-				m_countyNameTweetsMap.put(countyID, cur);
-				m_users.add(cur); //create new user from the file.
+				if(!m_countyNameTweetsMap.containsKey(countyID)){
+					_User cur = new _User(countyID, m_classNo, tweets);
+					m_countyNameTweetsMap.put(countyID, cur);
+					m_users.add(cur); //create new user from the file.
+				} else{
+					System.out.println("The county exists in the map!");
+				}
 			} else if(tweets.size() == 1){// added by Lin, for those users with fewer than 2 reviews, ignore them.
 				tweet = tweets.get(0);
 				rollBack(Utils.revertSpVct(tweet.getSparse()), tweet.getYLabel());
@@ -213,7 +223,7 @@ public class UserAnalyzer extends DocAnalyzer {
 				countyID = findID(strs);
 				if(m_countyNameTweetsMap.containsKey(countyID)){
 					_User user = m_countyNameTweetsMap.get(countyID);
-					user.setIATScore(Double.valueOf(strs[3]));
+					user.setIATScore(Double.valueOf(strs[4]));
 					user.setDemographics(strs);
 				}
 			}
@@ -283,30 +293,30 @@ public class UserAnalyzer extends DocAnalyzer {
 		}
 		return rvws;
 	}
-	
-	// Split the twitter data into half as training and half as testing.
-	public void splitData(String folder, String traindir, String testdir){
-		long t1 = System.currentTimeMillis();
-		int count = 0;
-		if(folder == null || folder.isEmpty())
-				return;
-		File dir = new File(folder);
-		for(File f: dir.listFiles()){
-			if(f.isFile() && f.getAbsolutePath().endsWith(".csv")){
-				splitUser(f.getAbsolutePath(), traindir, testdir);
-				count++;
-				if(count%10 == 0)
-					System.out.print(".");
-				} else if (f.isDirectory())
-					loadUserDir(f.getAbsolutePath());
-		}
-			
-		long t2 = System.currentTimeMillis();
-		t2 -= t1;
-		t2 /= 1000;
-		System.out.println(t2 + " secs are used to load the tweets.");
-		System.out.format("%d counties of tweets are splitted from %s...\n", count, folder);
-	}
+//	
+//	// Split the twitter data into half as training and half as testing.
+//	public void splitData(String folder, String suffix, String traindir, String testdir){
+//		long t1 = System.currentTimeMillis();
+//		int count = 0;
+//		if(folder == null || folder.isEmpty())
+//				return;
+//		File dir = new File(folder);
+//		for(File f: dir.listFiles()){
+//			if(f.isFile() && f.getAbsolutePath().endsWith(".csv")){
+//				splitUser(f.getAbsolutePath(), traindir, testdir);
+//				count++;
+//				if(count%10 == 0)
+//					System.out.print(".");
+//				} else if (f.isDirectory())
+//					loadUserDir(f.getAbsolutePath(), suffix);
+//		}
+//			
+//		long t2 = System.currentTimeMillis();
+//		t2 -= t1;
+//		t2 /= 1000;
+//		System.out.println(t2 + " secs are used to load the tweets.");
+//		System.out.format("%d counties of tweets are splitted from %s...\n", count, folder);
+//	}
 	
 	// split the tweets of one county into two parts.
 	public void splitUser(String filename, String traindir, String testdir){
@@ -365,5 +375,55 @@ public class UserAnalyzer extends DocAnalyzer {
 			e.printStackTrace();
 		}
 	}
+	public String extractRelation(String filename){
+		String[] strs = filename.split("/");
+		String name = strs[strs.length-1];
+		return name.substring(0, name.indexOf("."));
+	}
+	// Generate the data in arff format for linear regression.
+	public void generateArffData(String filename){
+		PrintWriter writer;
+		try{
+			writer = new PrintWriter(new File(filename));
+			writer.write(String.format("@RELATION %s\n", extractRelation(filename)));
+			/**Write attributes:
+			 * the first one is bias, the following ones are features, the final one is y.**/
+			writer.write("@ATTRIBUTE bias\tNUMERIC\n");
+			for(String s: m_featureNames){
+				writer.write(String.format("@ATTRIBUTE %s\tNUMERIC\n", s));
+			}
+			writer.write("@ATTRIBUTE class\tNUMERIC\n\n@Data\n");
+			for(_User u: m_users){
+				writer.write("{");
+				double[] vct = formatEachUser(u);
+				for(int i=0; i<vct.length; i++){
+					if(vct[i] != 0){
+						writer.write(String.format("%d %.4f", i, vct[i]));
+						if(i != vct.length-1)
+							writer.write(",");
+					}
+					
+				}
+				writer.write("}\n");
+			}
+			writer.close();
+		} catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
+	public double[] formatEachUser(_User u){
+		double[] vct = new double[getFeatureSize()+2];
+		for(_Review r: u.getReviews()){
+			for(_SparseFeature sf: r.getSparse()){
+				vct[sf.getIndex()+1] += sf.getValue();
+			}
+		}
+		vct[vct.length-1] = u.getIATScore();
+		return vct;
+	}
+	
 	
 }
