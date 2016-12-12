@@ -8,8 +8,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 import opennlp.tools.util.InvalidFormatException;
 import structures._Doc;
+import structures._RankItem;
 import structures._Review;
 import structures._Review.rType;
 import structures._SparseFeature;
@@ -62,8 +65,8 @@ public class UserAnalyzer extends DocAnalyzer {
 		m_adaptRatio = adapt;	
 		m_enforceAdapt = enforceAdpt;
 	}
-
-	public boolean loadCV(String filename){
+	@Override
+	public boolean LoadCV(String filename){
 		if (filename==null || filename.isEmpty())
 			return false;
 		
@@ -392,7 +395,7 @@ public class UserAnalyzer extends DocAnalyzer {
 			for(String s: m_featureNames){
 				writer.write(String.format("@ATTRIBUTE %s\tNUMERIC\n", s));
 			}
-			writer.write("@ATTRIBUTE class\tNUMERIC\n\n@Data\n");
+			writer.write("@ATTRIBUTE ylabel\tNUMERIC\n\n@Data\n");
 			for(_User u: m_users){
 				writer.write("{");
 				double[] vct = formatEachUser(u);
@@ -423,6 +426,44 @@ public class UserAnalyzer extends DocAnalyzer {
 		}
 		vct[vct.length-1] = u.getIATScore();
 		return vct;
+	}
+	
+	public void selectFeatures(double[] coef, int k, String filename){
+		if(k > coef.length)
+			System.out.println("K out of feature range!");
+		_RankItem[] items = new _RankItem[coef.length];
+		for(int i=0; i<coef.length; i++){
+			items[i] = new _RankItem(i, Math.abs(coef[i]));
+		}
+		System.out.print(String.format("[Info] %sd features in total!\n", coef.length));
+		Arrays.sort(items, new Comparator<_RankItem>(){
+			@Override
+			public int compare(_RankItem i1, _RankItem i2){
+				return (int) (i2.m_value - i1.m_value);
+			}
+		});
+		String[] features = new String[k];
+		for(int i=0; i<k; i++){
+			_RankItem ri = items[i];
+			if(ri.m_index == 0)
+				features[i] = "BIAS";
+			else
+				features[i] = m_featureNames.get(ri.m_index-1);
+		}
+		try{
+			PrintWriter writer = new PrintWriter(new File(filename));
+			for(String s: features)
+				writer.write(s+"\n");
+			System.out.print(String.format("%d features are written to %s", k, filename));
+			writer.close();
+		} catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+	
+	public void printFeatures(){
+		for(String s: m_featureNames)
+			System.out.print(s+",");
 	}
 	
 	
