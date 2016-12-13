@@ -333,6 +333,18 @@ public class Utils {
 		}
 	}
 	
+	static public void L2Normalization(double[] vs) {
+		double sum = L2Norm(vs);
+		if (sum>0) {			
+			for(int i=0; i<vs.length; i++){
+				vs[i] /= sum;
+			}
+		}
+		else{
+			System.out.println("Zero sum!");
+		}
+	}
+	
 	static public String getJSONValue(JSONObject json, String key) {
 		try {
 			if (json.has(key))				

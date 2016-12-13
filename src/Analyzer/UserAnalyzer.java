@@ -76,14 +76,17 @@ public class UserAnalyzer extends DocAnalyzer {
 			m_Ngram = 2;//default value of Ngram
 			String line;
 			// collect all the features
+			int count = 0;
 			while ((line = reader.readLine()) != null) {
+				if(line.startsWith("#")) continue;
 				features.add(SnowballStemming(Normalize(Tokenizer(line)[0])));
+				count++;
 			}
 			for(String fv: features)
 				expandVocabulary(fv);
 			reader.close();
 			
-			System.out.format("Load %d %d-gram seed words from %s...\n", m_featureNames.size(), m_Ngram, filename);
+			System.out.format("Load %d/%d %d-gram features from %s...\n", m_featureNames.size(), count, m_Ngram, filename);
 			m_isCVLoaded = true;
 			return true;
 		} catch (IOException e) {
@@ -188,11 +191,11 @@ public class UserAnalyzer extends DocAnalyzer {
 					
 				}
 			}
-			if(tweets.size() > 0){
-				System.out.print(String.format("---%s county has %d tweets containing seed words.---\n", countyID, tweets.size()));
+//			if(tweets.size() > 0){
+//				System.out.print(String.format("---%s county has %d tweets containing seed words.---\n", countyID, tweets.size()));
 //				for(_Review t: tweets)
 //					System.out.println(t.getSource());
-			}
+//			}
 			if(tweets.size() >= 1){//at least one for adaptation and one for testing
 				if(!m_countyNameTweetsMap.containsKey(countyID)){
 					_User cur = new _User(countyID, m_classNo, tweets);
@@ -226,7 +229,8 @@ public class UserAnalyzer extends DocAnalyzer {
 				countyID = findID(strs);
 				if(m_countyNameTweetsMap.containsKey(countyID)){
 					_User user = m_countyNameTweetsMap.get(countyID);
-					user.setIATScore(Double.valueOf(strs[4]));
+					user.setImpScore(Double.valueOf(strs[4]));
+					user.setExpScore(Double.valueOf(strs[6]));
 					user.setDemographics(strs);
 				}
 			}
@@ -384,7 +388,7 @@ public class UserAnalyzer extends DocAnalyzer {
 		return name.substring(0, name.indexOf("."));
 	}
 	// Generate the data in arff format for linear regression.
-	public void generateArffData(String filename){
+	public void generateArffData(String filename, String att){
 		PrintWriter writer;
 		try{
 			writer = new PrintWriter(new File(filename));
@@ -398,7 +402,7 @@ public class UserAnalyzer extends DocAnalyzer {
 			writer.write("@ATTRIBUTE ylabel\tNUMERIC\n\n@Data\n");
 			for(_User u: m_users){
 				writer.write("{");
-				double[] vct = formatEachUser(u);
+				double[] vct = formatEachUser(u, att);
 				for(int i=0; i<vct.length; i++){
 					if(vct[i] != 0){
 						writer.write(String.format("%d %.4f", i, vct[i]));
@@ -417,14 +421,18 @@ public class UserAnalyzer extends DocAnalyzer {
 	
 	
 	
-	public double[] formatEachUser(_User u){
+	public double[] formatEachUser(_User u, String att){
 		double[] vct = new double[getFeatureSize()+2];
 		for(_Review r: u.getReviews()){
 			for(_SparseFeature sf: r.getSparse()){
 				vct[sf.getIndex()+1] += sf.getValue();
 			}
 		}
-		vct[vct.length-1] = u.getIATScore();
+		Utils.L2Normalization(vct);
+		if(att.equals("Imp"))
+			vct[vct.length-1] = u.getImpScore();
+		else if(att.equals("Exp"))
+			vct[vct.length-1] = u.getExpScore();
 		return vct;
 	}
 	

@@ -305,12 +305,19 @@ public class _User {
 	}
 
 	// Added by Lin for DSI project.
-	double m_iat = 0;
-	public void setIATScore(double v){
-		m_iat = v;
+	double m_imp = 0;
+	double m_exp = 0;
+	public void setImpScore(double v){
+		m_imp = v;
 	}
-	public double getIATScore(){
-		return m_iat;
+	public void setExpScore(double v){
+		m_exp = v;
+	}
+	public double getImpScore(){
+		return m_imp;
+	}
+	public double getExpScore(){
+		return m_exp;
 	}
 	
 	// class demographics

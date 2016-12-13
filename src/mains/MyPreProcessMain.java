@@ -1,13 +1,9 @@
 package mains;
 
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 
 import opennlp.tools.util.InvalidFormatException;
-import weka.classifiers.functions.LinearRegression;
-import weka.core.Instances;
 import Analyzer.UserAnalyzer;
 
 public class MyPreprocessMain {
@@ -22,59 +18,65 @@ public class MyPreprocessMain {
 		String tokenModel = "./data/Model/en-token.bin"; // Token model.
 		String stopwords = "./data/Model/stopwords.dat";
 			
-//		String tweetTrain = "/if15/lg5bt/tweetData/tweetsTrain/";
-//		String tweetTest = "/if15/lg5bt/tweetData/tweetsTest/";
+		String tweetTrain = "/if15/lg5bt/tweetData/tweetsTrain/";
+		String tweetTest = "/if15/lg5bt/tweetData/tweetsTest/";
 		
-		String tweetTrain = "./data/tweetsTrain_4/";
-		String tweetTest = "./data/tweetsTest_3/";
+//		String tweetTrain = "./data/tweetsTrain_4/";
+//		String tweetTest = "./data/tweetsTest_3/";
 			
-		int k = 1000;
-		String fv = "seed"; //"fs", "demo"
-		String type = "gay";// "black" or "gay"
+		int k = 2000;
+		String fv = "df";
+		String type = "black";// "black" or "gay"
 		String suffix = ".csv";
-		String features = String.format("./data/%s_%s.txt", type, fv);
+		String features = String.format("./data/%s_%s_%d.txt", type, fv, k);
 		
 		String trainIAT = String.format("./data/%sTrain.csv", type);
 		String testIAT = String.format("./data/%sTest.csv", type);
 			
-		String trainFile = String.format("./data/%s_train_%s.arff", type, fv);		
-		String testFile = String.format("./data/%s_test_%s.arff", type, fv);
-		
-//		System.out.println(String.format("Start generating %s features....", type));
-//		UserAnalyzer fs_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
-//		fs_analyzer.printFeatures();
-//
+		String trainImpFile = String.format("/if15/lg5bt/ArffData/%s_train_imp_%s_%d.arff", type, fv, k);	
+		String trainExpFile = String.format("/if15/lg5bt/ArffData/%s_train_exp_%s_%d.arff", type, fv, k);
+		String testImpFile = String.format("/if15/lg5bt/ArffData/%s_test_imp_%s_%d.arff", type, fv, k);
+		String testExpFile = String.format("/if15/lg5bt/ArffData/%s_test_exp_%s_%d.arff", type, fv, k);
+
+//		int maxDF = -1, minDF = 0;
+//		System.out.println(String.format("Start generating %s features based on DF....", type));
+//		UserAnalyzer fs_analyzer = new UserAnalyzer(tokenModel, classNumber, null, Ngram, lengthThreshold, false);
 //		fs_analyzer.LoadStopwords(stopwords);
 //		fs_analyzer.loadUserDir(tweetTrain, suffix);
-//		fs_analyzer.loadIAT(trainIAT);
-//		fs_analyzer.setFeatureValues("TFIDF", 0);
-//		fs_analyzer.generateArffData(trainFile);
+//		fs_analyzer.featureSelection(features, "DF", maxDF, minDF, k);
+		
+//		System.out.println(String.format("Start generating %s training tweets....", type));
+//		UserAnalyzer train_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
+//		train_analyzer.LoadStopwords(stopwords);
+//		train_analyzer.loadUserDir(tweetTrain, suffix);
+//		train_analyzer.loadIAT(trainIAT);
+//		train_analyzer.setFeatureValues("TFIDF", 2);
+//		train_analyzer.generateArffData(trainImpFile, "Imp");
+//		train_analyzer.generateArffData(trainExpFile, "Exp");
 //		
-//		try{
-//			// feature selection based on the feature coefficients.
-//			LinearRegression lr = new LinearRegression();
-//			BufferedReader trainReader = new BufferedReader(new FileReader(trainFile));
-//			Instances train = new Instances(trainReader);
-//			train.setClassIndex(train.numAttributes() - 1);
-//			lr.buildClassifier(train);
-//			fs_analyzer.selectFeatures(lr.coefficients(), k, features);
-//		} catch(Exception e){
-//			e.printStackTrace();
-//		}
-//		
+//		System.out.println(String.format("Start generating %s testing tweets....", type));
+//		UserAnalyzer test_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
+//		test_analyzer.loadUserDir(tweetTest, suffix);
+//		test_analyzer.loadIAT(testIAT);
+//		test_analyzer.setFeatureValues("TFIDF", 2);
+//		test_analyzer.generateArffData(testImpFile, "Imp");
+//		test_analyzer.generateArffData(testExpFile, "Exp");
+		
 		System.out.println(String.format("Start generating %s training tweets....", type));
 		UserAnalyzer train_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
 		train_analyzer.LoadStopwords(stopwords);
 		train_analyzer.loadUserDir(tweetTrain, suffix);
 		train_analyzer.loadIAT(trainIAT);
-		train_analyzer.setFeatureValues("TFIDF", 0);
-		train_analyzer.generateArffData(trainFile);
+		train_analyzer.setFeatureValues("TFIDF", 2);
+		train_analyzer.generateArffData(trainImpFile, "Imp");
+		train_analyzer.generateArffData(trainExpFile, "Exp");
 		
 		System.out.println(String.format("Start generating %s testing tweets....", type));
 		UserAnalyzer test_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
 		test_analyzer.loadUserDir(tweetTest, suffix);
 		test_analyzer.loadIAT(testIAT);
-		test_analyzer.setFeatureValues("TFIDF", 0);
-		test_analyzer.generateArffData(testFile);
+		test_analyzer.setFeatureValues("TFIDF", 2);
+		test_analyzer.generateArffData(testImpFile, "Imp");
+		test_analyzer.generateArffData(testExpFile, "Exp");
 	}
 }

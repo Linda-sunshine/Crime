@@ -20,35 +20,55 @@ import Analyzer.UserAnalyzer;
 import Classifier.supervised.GlobalSVM;
 import Classifier.supervised.SVM;
 import Classifier.supervised.modelAdaptation.HDP.MTCLRWithHDP;
-import Regression.MyLinearRegression;
 
 public class MyLRMain {
 	//In the main function, we want to input the data and do adaptation 
 	public static void main(String[] args) throws InvalidFormatException, FileNotFoundException, IOException{
 		try{
-			String fv = "seed"; //"fs", "demo"
-			String type = "black";// "black" or "gay"
+			int k = 4000;
+			String fv = "df"; //"df", "demo"
+			String type = "gay";// "black" or "gay"
 							
-			String trainFile = String.format("./data/%s_train_%s.arff", type, fv);		
-			String testFile = String.format("./data/%s_test_%s.arff", type, fv);
+			String trainImpFile = String.format("./data/ArffData/%s_train_imp_%s_%d.arff", type, fv, k);	
+			String trainExpFile = String.format("./data/ArffData/%s_train_exp_%s_%d.arff", type, fv, k);
+			String testImpFile = String.format("./data/ArffData/%s_test_imp_%s_%d.arff", type, fv, k);
+			String testExpFile = String.format("./data/ArffData/%s_test_exp_%s_%d.arff", type, fv, k);
 
 			LinearRegression lr = new LinearRegression();
 			
-			System.out.println(String.format("Start loading %s training data....", type));
-			BufferedReader trainReader = new BufferedReader(new FileReader(trainFile));
+			System.out.println(String.format("Start loading %s training data from %s....", type, trainImpFile));
+			BufferedReader trainReader = new BufferedReader(new FileReader(trainImpFile));
 			Instances train = new Instances(trainReader);
 			train.setClassIndex(train.numAttributes() - 1);
 			lr.buildClassifier(train);
 			
-			System.out.println(String.format("Start loading %s testing data....", type));
-			BufferedReader testReader = new BufferedReader(new FileReader(testFile));
+			System.out.println(String.format("Start loading %s testing data from %s....", type, testImpFile));
+			BufferedReader testReader = new BufferedReader(new FileReader(testImpFile));
 			Instances test = new Instances(testReader);
 			test.setClassIndex(test.numAttributes() - 1);
 
 			System.out.println("Start evaluation...");
 			Evaluation eval = new Evaluation(train);
 			eval.evaluateModel(lr, test);
-			System.out.println(eval.toSummaryString("\nResults\n======\n", false));
+			System.out.println(eval.toSummaryString("\nResults For Implicit Attitudes\n======\n", false));
+			
+			System.out.println(String.format("Start loading %s training data from %s....", type, trainExpFile));
+			trainReader = new BufferedReader(new FileReader(trainExpFile));
+			train = new Instances(trainReader);
+			train.setClassIndex(train.numAttributes() - 1);
+			lr.buildClassifier(train);
+			
+			System.out.println(String.format("Start loading %s testing data from %s....", type, testExpFile));
+			testReader = new BufferedReader(new FileReader(testExpFile));
+			test = new Instances(testReader);
+			test.setClassIndex(test.numAttributes() - 1);
+
+			System.out.println("Start evaluation...");
+			eval = new Evaluation(train);
+			eval.evaluateModel(lr, test);
+			System.out.println(eval.toSummaryString("\nResults for Explicit Results\n======\n", false));
+			
+			
 		} catch(Exception e){
 			e.printStackTrace();
 		}
