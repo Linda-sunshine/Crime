@@ -25,14 +25,15 @@ public class MyLRMain {
 	//In the main function, we want to input the data and do adaptation 
 	public static void main(String[] args) throws InvalidFormatException, FileNotFoundException, IOException{
 		try{
-			int k = 4000;
+			int[] ks = new int[]{2000, 3000, 4000};
+			for(int k: ks){
 			String fv = "df"; //"df", "demo"
 			String type = "gay";// "black" or "gay"
 							
-			String trainImpFile = String.format("./data/ArffData/%s_train_imp_%s_%d.arff", type, fv, k);	
-			String trainExpFile = String.format("./data/ArffData/%s_train_exp_%s_%d.arff", type, fv, k);
-			String testImpFile = String.format("./data/ArffData/%s_test_imp_%s_%d.arff", type, fv, k);
-			String testExpFile = String.format("./data/ArffData/%s_test_exp_%s_%d.arff", type, fv, k);
+			String trainImpFile = String.format("/if15/lg5bt/ArffData/%s_train_imp_%s_%d.arff", type, fv, k);	
+			String trainExpFile = String.format("/if15/lg5bt/ArffData/%s_train_exp_%s_%d.arff", type, fv, k);
+			String testImpFile = String.format("/if15/lg5bt/ArffData/%s_test_imp_%s_%d.arff", type, fv, k);
+			String testExpFile = String.format("/if15/lg5bt/ArffData/%s_test_exp_%s_%d.arff", type, fv, k);
 
 			LinearRegression lr = new LinearRegression();
 			
@@ -68,7 +69,7 @@ public class MyLRMain {
 			eval.evaluateModel(lr, test);
 			System.out.println(eval.toSummaryString("\nResults for Explicit Results\n======\n", false));
 			
-			
+			}
 		} catch(Exception e){
 			e.printStackTrace();
 		}

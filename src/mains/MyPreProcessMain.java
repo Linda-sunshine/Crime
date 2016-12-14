@@ -33,10 +33,10 @@ public class MyPreprocessMain {
 		String trainIAT = String.format("./data/%sTrain.csv", type);
 		String testIAT = String.format("./data/%sTest.csv", type);
 			
-		String trainImpFile = String.format("/if15/lg5bt/ArffData/%s_train_imp_%s_%d.arff", type, fv, k);	
-		String trainExpFile = String.format("/if15/lg5bt/ArffData/%s_train_exp_%s_%d.arff", type, fv, k);
-		String testImpFile = String.format("/if15/lg5bt/ArffData/%s_test_imp_%s_%d.arff", type, fv, k);
-		String testExpFile = String.format("/if15/lg5bt/ArffData/%s_test_exp_%s_%d.arff", type, fv, k);
+		String trainImpFile = String.format("/if15/lg5bt/ArffData/%s_train_imp_%s_%d_demo.arff", type, fv, k);	
+		String trainExpFile = String.format("/if15/lg5bt/ArffData/%s_train_exp_%s_%d_demo.arff", type, fv, k);
+		String testImpFile = String.format("/if15/lg5bt/ArffData/%s_test_imp_%s_%d_demo.arff", type, fv, k);
+		String testExpFile = String.format("/if15/lg5bt/ArffData/%s_test_exp_%s_%d_demo.arff", type, fv, k);
 
 //		int maxDF = -1, minDF = 0;
 //		System.out.println(String.format("Start generating %s features based on DF....", type));

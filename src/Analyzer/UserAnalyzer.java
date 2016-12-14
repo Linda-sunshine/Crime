@@ -387,6 +387,8 @@ public class UserAnalyzer extends DocAnalyzer {
 		String name = strs[strs.length-1];
 		return name.substring(0, name.indexOf("."));
 	}
+	String[] m_demos = new String[]{"avgAge", "pctHisp", "pctWht", "pctBlck", "pctFml", "pctCllg", "pctCnsv", "pctUnemp"};
+	
 	// Generate the data in arff format for linear regression.
 	public void generateArffData(String filename, String att){
 		PrintWriter writer;
@@ -399,10 +401,13 @@ public class UserAnalyzer extends DocAnalyzer {
 			for(String s: m_featureNames){
 				writer.write(String.format("@ATTRIBUTE %s\tNUMERIC\n", s));
 			}
+			for(String s: m_demos){
+				writer.write(String.format("@ATTRIBUTE %s\tNUMERIC\n", s));
+			}
 			writer.write("@ATTRIBUTE ylabel\tNUMERIC\n\n@Data\n");
 			for(_User u: m_users){
 				writer.write("{");
-				double[] vct = formatEachUser(u, att);
+				double[] vct = formatEachUserDemo(u, att);
 				for(int i=0; i<vct.length; i++){
 					if(vct[i] != 0){
 						writer.write(String.format("%d %.4f", i, vct[i]));
@@ -419,14 +424,32 @@ public class UserAnalyzer extends DocAnalyzer {
 		}
 	}
 	
+//	public double[] formatEachUser(_User u, String att){
+//		double[] vct = new double[getFeatureSize()+2];
+//		for(_Review r: u.getReviews()){
+//			for(_SparseFeature sf: r.getSparse()){
+//				vct[sf.getIndex()+1] += sf.getValue();
+//			}
+//		}
+//		Utils.L2Normalization(vct);
+//		if(att.equals("Imp"))
+//			vct[vct.length-1] = u.getImpScore();
+//		else if(att.equals("Exp"))
+//			vct[vct.length-1] = u.getExpScore();
+//		return vct;
+//	}
 	
-	
-	public double[] formatEachUser(_User u, String att){
-		double[] vct = new double[getFeatureSize()+2];
+	// With demographics
+	public double[] formatEachUserDemo(_User u, String att){
+		double[] vct = new double[getFeatureSize()+10];// 8 features for demo
 		for(_Review r: u.getReviews()){
 			for(_SparseFeature sf: r.getSparse()){
 				vct[sf.getIndex()+1] += sf.getValue();
 			}
+		}
+		double[] demo = u.getDemographics();
+		for(int i=0; i<demo.length; i++){
+			vct[getFeatureSize() + 1 + i] = demo[i];
 		}
 		Utils.L2Normalization(vct);
 		if(att.equals("Imp"))
