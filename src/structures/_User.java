@@ -342,9 +342,19 @@ public class _User {
 			m_pctCnsv = Double.parseDouble(strs[13]);
 			m_pctUnemp = Double.parseDouble(strs[14]);
 		}
+		
+		public double[] getNormDemo(){
+			double[] demo = new double[]{m_avgAge, m_pctHisp, m_pctWht, m_pctBlck, m_pctFml, m_pctCllg, m_pctCnsv, m_pctUnemp};
+			Utils.L2Normalization(demo);
+			return demo;
+		}
 	}
 	Demographics m_dmg;
 	public void setDemographics(String[] strs){
 		m_dmg = new Demographics(strs);
+	}
+	
+	public double[] getDemographics(){
+		return m_dmg.getNormDemo();
 	}
  }
