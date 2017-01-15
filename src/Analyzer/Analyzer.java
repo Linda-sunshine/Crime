@@ -353,7 +353,7 @@ public abstract class Analyzer {
 	// Added by Lin for feature selection.
 	//Select the features and store them in a file.
 	public void featureSelection(String location, String featureSelection, int maxDF, int minDF, int topK) throws FileNotFoundException {
-		FeatureSelector selector = new FeatureSelector(0, 1, maxDF, minDF);
+		FeatureSelector selector = new FeatureSelector(0.1, 1, maxDF, minDF);
 
 		System.out.println("*******************************************************************");
 		if (featureSelection.equals("DF"))

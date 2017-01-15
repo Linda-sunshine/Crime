@@ -86,7 +86,7 @@ public class DocAnalyzer extends Analyzer {
 		m_newCV = b;// added by Lin for using different cv.
 		m_isCVLoaded = LoadCV(providedCV);
 		m_stopwords = new HashSet<String>();
-		m_releaseContent = true;
+		m_releaseContent = b;
 	}
 	//TokenModel + stnModel.
 	public DocAnalyzer(String tokenModel, String stnModel, int classNo, String providedCV, int Ngram, int threshold)

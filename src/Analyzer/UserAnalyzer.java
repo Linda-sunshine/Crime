@@ -6,9 +6,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,12 +19,15 @@ import java.util.concurrent.TimeUnit;
 
 import opennlp.tools.util.InvalidFormatException;
 import structures._Doc;
+import structures._RankItem;
 import structures._Review;
 import structures._Review.rType;
 import structures._SparseFeature;
 import structures._User;
 import structures._stat;
 import utils.Utils;
+import weka.core.DenseInstance;
+import weka.core.Instance;
 
 /**
  * 
@@ -59,8 +65,8 @@ public class UserAnalyzer extends DocAnalyzer {
 		m_adaptRatio = adapt;	
 		m_enforceAdapt = enforceAdpt;
 	}
-
-	public boolean loadCV(String filename){
+	@Override
+	public boolean LoadCV(String filename){
 		if (filename==null || filename.isEmpty())
 			return false;
 		
@@ -70,14 +76,17 @@ public class UserAnalyzer extends DocAnalyzer {
 			m_Ngram = 2;//default value of Ngram
 			String line;
 			// collect all the features
+			int count = 0;
 			while ((line = reader.readLine()) != null) {
+				if(line.startsWith("#")) continue;
 				features.add(SnowballStemming(Normalize(Tokenizer(line)[0])));
+				count++;
 			}
 			for(String fv: features)
 				expandVocabulary(fv);
 			reader.close();
 			
-			System.out.format("Load %d %d-gram seed words from %s...\n", m_featureNames.size(), m_Ngram, filename);
+			System.out.format("Load %d/%d %d-gram features from %s...\n", m_featureNames.size(), count, m_Ngram, filename);
 			m_isCVLoaded = true;
 			return true;
 		} catch (IOException e) {
@@ -122,27 +131,28 @@ public class UserAnalyzer extends DocAnalyzer {
 	}
 	
 	//Load all the users.
-	public void loadUserDir(String folder){
+	public void loadUserDir(String folder, String suffix){
 		long t1 = System.currentTimeMillis();
-		int count = 0;
+		int fCount = 0;
 		if(folder == null || folder.isEmpty())
 			return;
 		File dir = new File(folder);
 		for(File f: dir.listFiles()){
-			if(f.isFile()){
+			if(f.isFile() && f.getAbsolutePath().endsWith(suffix)){
 				loadUser(f.getAbsolutePath());
-				count++;
-				if(count%10 == 0)
+				fCount++;
+				if(fCount%10 == 0)
 					System.out.print(".");
 			} else if (f.isDirectory())
-				loadUserDir(f.getAbsolutePath());
+				loadUserDir(f.getAbsolutePath(), suffix);
 		}
 		
 		long t2 = System.currentTimeMillis();
 		t2 -= t1;
 		t2 /= 1000;
+		System.out.println("---------------------------------------------");
 		System.out.println(t2 + " secs are used to load the users.");
-		System.out.format("%d users are loaded from %s...\n", count, folder);
+		System.out.format("%d/%d users are loaded from %s...\n", m_users.size(), fCount, folder);
 	}
 	
 	String extractUserID(String text) {
@@ -176,17 +186,24 @@ public class UserAnalyzer extends DocAnalyzer {
 					source = strs[3];
 					tweet = new _Review(m_corpus.getCollection().size(), source, 0, countyID);
 					
-					if(AnalyzeDoc(tweet)) //Create the sparse vector for the review.
-						tweets.add(tweet);	
+					if(AnalyzeDoc(tweet))//Create the sparse vector for the review.
+						tweets.add(tweet);
+					
 				}
 			}
-			if(tweets.size() > 0)
-				System.out.println(String.format("%d tweets are loaded from %s.\n", tweets.size(), filename));
-			
+//			if(tweets.size() > 0){
+//				System.out.print(String.format("---%s county has %d tweets containing seed words.---\n", countyID, tweets.size()));
+//				for(_Review t: tweets)
+//					System.out.println(t.getSource());
+//			}
 			if(tweets.size() >= 1){//at least one for adaptation and one for testing
-				_User cur = new _User(countyID, m_classNo, tweets);
-				m_countyNameTweetsMap.put(countyID, cur);
-				m_users.add(cur); //create new user from the file.
+				if(!m_countyNameTweetsMap.containsKey(countyID)){
+					_User cur = new _User(countyID, m_classNo, tweets);
+					m_countyNameTweetsMap.put(countyID, cur);
+					m_users.add(cur); //create new user from the file.
+				} else{
+					System.out.println("The county exists in the map!");
+				}
 			} else if(tweets.size() == 1){// added by Lin, for those users with fewer than 2 reviews, ignore them.
 				tweet = tweets.get(0);
 				rollBack(Utils.revertSpVct(tweet.getSparse()), tweet.getYLabel());
@@ -212,7 +229,8 @@ public class UserAnalyzer extends DocAnalyzer {
 				countyID = findID(strs);
 				if(m_countyNameTweetsMap.containsKey(countyID)){
 					_User user = m_countyNameTweetsMap.get(countyID);
-					user.setIATScore(Double.valueOf(strs[3]));
+					user.setImpScore(Double.valueOf(strs[4]));
+					user.setExpScore(Double.valueOf(strs[6]));
 					user.setDemographics(strs);
 				}
 			}
@@ -282,10 +300,179 @@ public class UserAnalyzer extends DocAnalyzer {
 		}
 		return rvws;
 	}
-	
-//	// save collected tweets.
-//	public void saveTweets(String dir){
-//		for(_User u: m_users){
-//			
+//	
+//	// Split the twitter data into half as training and half as testing.
+//	public void splitData(String folder, String suffix, String traindir, String testdir){
+//		long t1 = System.currentTimeMillis();
+//		int count = 0;
+//		if(folder == null || folder.isEmpty())
+//				return;
+//		File dir = new File(folder);
+//		for(File f: dir.listFiles()){
+//			if(f.isFile() && f.getAbsolutePath().endsWith(".csv")){
+//				splitUser(f.getAbsolutePath(), traindir, testdir);
+//				count++;
+//				if(count%10 == 0)
+//					System.out.print(".");
+//				} else if (f.isDirectory())
+//					loadUserDir(f.getAbsolutePath(), suffix);
 //		}
+//			
+//		long t2 = System.currentTimeMillis();
+//		t2 -= t1;
+//		t2 /= 1000;
+//		System.out.println(t2 + " secs are used to load the tweets.");
+//		System.out.format("%d counties of tweets are splitted from %s...\n", count, folder);
+//	}
+	
+	// split the tweets of one county into two parts.
+	public void splitUser(String filename, String traindir, String testdir){
+		try {
+			File file = new File(filename);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+			String line;			
+			
+			String countyID = extractUserID(file.getName()); //UserId is contained in the filename.
+			String trainfile = traindir + countyID + ".csv";
+			String testfile = testdir + countyID + ".csv";
+			PrintWriter trainWriter = new PrintWriter(new File(trainfile));
+			PrintWriter testWriter = new PrintWriter(new File(testfile));
+			int trainCount = 0, testCount = 0;
+			// Skip the first line since it is user name.
+			reader.readLine(); 
+	
+			// Read Raw tweets.
+			ArrayList<String> rawTweets = new ArrayList<String>();
+			HashSet<Integer> trainIndexes = new HashSet<Integer>();
+			while((line = reader.readLine()) != null){
+				rawTweets.add(line);
+			}
+			
+			// If the tweets size is too small, it is hard to get half of them randomly.
+			if(rawTweets.size() < 100){
+				for(int i=0; i<rawTweets.size(); i+=2){
+					trainWriter.write(rawTweets.get(i)+"\n");
+					if(i+1 < rawTweets.size())
+						testWriter.write(rawTweets.get(i+1)+"\n");
+				}
+				trainCount = rawTweets.size()/2;
+				testCount = rawTweets.size() - trainCount;
+			} else{
+				boolean[] trainFlags = new boolean[rawTweets.size()];
+				// select random tweets as the training data
+				while(trainIndexes.size() < rawTweets.size()/2){
+					int index = (int)(Math.random()*rawTweets.size());
+					trainIndexes.add(index);
+					trainFlags[index] = true;
+				}
+				for(int i=0; i<trainFlags.length; i++){
+					if(trainFlags[i])
+						trainWriter.write(rawTweets.get(i)+"\n");
+					else
+						testWriter.write(rawTweets.get(i)+"\n");
+				}
+				trainCount = trainIndexes.size();
+				testCount = rawTweets.size() - trainCount;
+			}
+			System.out.println(String.format("%s\ttrain\t%d\ttest\t%d\n", countyID, trainCount, testCount));
+			reader.close();
+			trainWriter.close();
+			testWriter.close();
+		} catch(IOException e){
+			e.printStackTrace();
+		}
 	}
+	public String extractRelation(String filename){
+		String[] strs = filename.split("/");
+		String name = strs[strs.length-1];
+		return name.substring(0, name.indexOf("."));
+	}
+	// Generate the data in arff format for linear regression.
+	public void generateArffData(String filename, String att){
+		PrintWriter writer;
+		try{
+			writer = new PrintWriter(new File(filename));
+			writer.write(String.format("@RELATION %s\n", extractRelation(filename)));
+			/**Write attributes:
+			 * the first one is bias, the following ones are features, the final one is y.**/
+			writer.write("@ATTRIBUTE bias\tNUMERIC\n");
+			for(String s: m_featureNames){
+				writer.write(String.format("@ATTRIBUTE %s\tNUMERIC\n", s));
+			}
+			writer.write("@ATTRIBUTE ylabel\tNUMERIC\n\n@Data\n");
+			for(_User u: m_users){
+				writer.write("{");
+				double[] vct = formatEachUser(u, att);
+				for(int i=0; i<vct.length; i++){
+					if(vct[i] != 0){
+						writer.write(String.format("%d %.4f", i, vct[i]));
+						if(i != vct.length-1)
+							writer.write(",");
+					}
+					
+				}
+				writer.write("}\n");
+			}
+			writer.close();
+		} catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
+	public double[] formatEachUser(_User u, String att){
+		double[] vct = new double[getFeatureSize()+2];
+		for(_Review r: u.getReviews()){
+			for(_SparseFeature sf: r.getSparse()){
+				vct[sf.getIndex()+1] += sf.getValue();
+			}
+		}
+		Utils.L2Normalization(vct);
+		if(att.equals("Imp"))
+			vct[vct.length-1] = u.getImpScore();
+		else if(att.equals("Exp"))
+			vct[vct.length-1] = u.getExpScore();
+		return vct;
+	}
+	
+	public void selectFeatures(double[] coef, int k, String filename){
+		if(k > coef.length)
+			System.out.println("K out of feature range!");
+		_RankItem[] items = new _RankItem[coef.length];
+		for(int i=0; i<coef.length; i++){
+			items[i] = new _RankItem(i, Math.abs(coef[i]));
+		}
+		System.out.print(String.format("[Info] %sd features in total!\n", coef.length));
+		Arrays.sort(items, new Comparator<_RankItem>(){
+			@Override
+			public int compare(_RankItem i1, _RankItem i2){
+				return (int) (i2.m_value - i1.m_value);
+			}
+		});
+		String[] features = new String[k];
+		for(int i=0; i<k; i++){
+			_RankItem ri = items[i];
+			if(ri.m_index == 0)
+				features[i] = "BIAS";
+			else
+				features[i] = m_featureNames.get(ri.m_index-1);
+		}
+		try{
+			PrintWriter writer = new PrintWriter(new File(filename));
+			for(String s: features)
+				writer.write(s+"\n");
+			System.out.print(String.format("%d features are written to %s", k, filename));
+			writer.close();
+		} catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+	
+	public void printFeatures(){
+		for(String s: m_featureNames)
+			System.out.print(s+",");
+	}
+	
+	
+}
