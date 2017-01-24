@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.Normalizer;
+import java.util.ArrayList;
 
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
@@ -82,8 +83,7 @@ public class MyPreProcessMain {
 //		test_analyzer.generateArffData(testImpFile, "Imp", demo);
 //		test_analyzer.generateArffData(testExpFile, "Exp", demo);
 		
-		int in = 0;
-		String[] topFvs;
+		ArrayList<String> topFvs = new ArrayList<String>();
 		double[] weights;
 		MyPriorityQueue<_RankItem> rankq = new MyPriorityQueue<_RankItem>(k);
 		
@@ -113,13 +113,14 @@ public class MyPreProcessMain {
 			for(int i=0; i<weights.length-1; i++){
 				rankq.add(new _RankItem(i, Math.abs(weights[i])));
 			}
-			topFvs = new String[k];
 			for(_RankItem it: rankq){
-				System.out.print(String.format("(%.3f,%d)\t", it.m_value, it.m_index));
-				System.out.println( train.attribute(it.m_index).name());
-				topFvs[in++] = train.attribute(it.m_index).name();
+				if(it.m_value > 0){
+					System.out.print(String.format("(%.3f,%d)\t", it.m_value, it.m_index));
+					System.out.println( train.attribute(it.m_index).name());
+					topFvs.add(train.attribute(it.m_index).name());
+				}
 			}
-		
+			System.out.println(topFvs.size() + " features are selected for imp attitudes.");
 			try{
 				PrintWriter writer = new PrintWriter(new File(String.format("%s/%s/%s_toplr_%d_imp.txt", prefix, data, type, k)));
 				for(String f: topFvs)
@@ -147,19 +148,21 @@ public class MyPreProcessMain {
 			eval.evaluateModel(lr, test);
 			System.out.println(eval.toSummaryString("\nResults for Explicit Results\n======\n", false));
 			
-			in = 0;
 			rankq.clear();
+			topFvs.clear();
 			/***Write out the selected features.**/
 			weights = lr.coefficients();
 			for(int i=0; i<weights.length-1; i++){
 				rankq.add(new _RankItem(i, Math.abs(weights[i])));
 			}
-			topFvs = new String[k];
 			for(_RankItem it: rankq){
-				System.out.print(String.format("(%.3f,%d)\t", it.m_value, it.m_index));
-				System.out.println( train.attribute(it.m_index).name());
-				topFvs[in++] = train.attribute(it.m_index).name();
+				if(it.m_value > 0){
+					System.out.print(String.format("(%.3f,%d)\t", it.m_value, it.m_index));
+					System.out.println( train.attribute(it.m_index).name());
+					topFvs.add(train.attribute(it.m_index).name());
+				}
 			}
+			System.out.println(topFvs.size() + " features are selected for exp attitudes.");
 		
 			try{
 				PrintWriter writer = new PrintWriter(new File(String.format("%s/%s/%s_toplr_%d_exp.txt", prefix, data, type, k)));
