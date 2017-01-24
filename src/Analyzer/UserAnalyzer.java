@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -65,36 +66,7 @@ public class UserAnalyzer extends DocAnalyzer {
 		m_adaptRatio = adapt;	
 		m_enforceAdapt = enforceAdpt;
 	}
-	@Override
-	public boolean LoadCV(String filename){
-		if (filename==null || filename.isEmpty())
-			return false;
-		
-		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF-8"));
-			Set<String> features = new HashSet<String>();
-			m_Ngram = 2;//default value of Ngram
-			String line;
-			// collect all the features
-			int count = 0;
-			while ((line = reader.readLine()) != null) {
-				if(line.startsWith("#")) continue;
-				features.add(SnowballStemming(Normalize(Tokenizer(line)[0])));
-				count++;
-			}
-			for(String fv: features)
-				expandVocabulary(fv);
-			reader.close();
-			
-			System.out.format("Load %d/%d %d-gram features from %s...\n", m_featureNames.size(), count, m_Ngram, filename);
-			m_isCVLoaded = true;
-			return true;
-		} catch (IOException e) {
-			System.err.format("[Error]Failed to open file %s!!", filename);
-			return false;
-		}
-	}
-	
+
 	// Load the new cv.
 	protected boolean loadNewCV(String filename){
 		if (filename==null || filename.isEmpty())
@@ -208,6 +180,7 @@ public class UserAnalyzer extends DocAnalyzer {
 				tweet = tweets.get(0);
 				rollBack(Utils.revertSpVct(tweet.getSparse()), tweet.getYLabel());
 			}
+//			System.out.println("county tweet size " + m_countyNameTweetsMap.size());
 			reader.close();
 		} catch(IOException e){
 			e.printStackTrace();
@@ -222,24 +195,88 @@ public class UserAnalyzer extends DocAnalyzer {
 			String[] strs;
 
 			// Skip the first line since it is user name.
-			reader.readLine(); 
-
+//			reader.readLine(); 
+			int count = 0;
 			while((line = reader.readLine()) != null){
 				strs = line.replaceAll("\\s", "").split(",");
 				countyID = findID(strs);
 				if(m_countyNameTweetsMap.containsKey(countyID)){
+					count++;
 					_User user = m_countyNameTweetsMap.get(countyID);
-					user.setImpScore(Double.valueOf(strs[4]));
-					user.setExpScore(Double.valueOf(strs[6]));
+					user.setImpScore(Double.valueOf(strs[3]));
+					user.setExpScore(Double.valueOf(strs[5]));
 					user.setDemographics(strs);
 				}
+				else
+					System.out.println(countyID);
 			}
+			System.out.println("the number of counties of iat score "+count);
 			reader.close();
 		} catch(IOException e){
 			e.printStackTrace();
 		}
 	}
-	
+	ArrayList<String> m_counties = new ArrayList<String>();
+	HashSet<String> m_sltCounties = new HashSet<String>();
+	public void loadIATCounties(String filename, int k){
+		try {
+			File file = new File(filename);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+			String line, countyID;			
+			String[] strs;
+
+			// Skip the first line since it is user name.
+			reader.readLine(); 
+
+			while((line = reader.readLine()) != null){
+				strs = line.replaceAll("\\s", "").split(",");
+				countyID = findID(strs);
+				m_counties.add(countyID);
+			}
+			reader.close();
+		} catch(IOException e){
+			e.printStackTrace();
+		}
+		int idx = 0;
+		while(m_sltCounties.size() < k){
+			idx = (int)(Math.random()*m_counties.size());
+			m_sltCounties.add(m_counties.get(idx));
+		}
+	}
+	HashSet<String> tweetCounties = new HashSet<String>();
+	HashSet<String> iatCounties = new HashSet<String>();
+	public void saveTrainTestTweets(String folder, String suffix, String traindir, String testdir){
+		if(folder == null || folder.isEmpty())
+			return;
+		File dir = new File(folder);
+		String userID = "";
+		int trainCount = 0, testCount = 0;
+		try{			
+			for(File f: dir.listFiles()){
+				if(f.isFile() && f.getAbsolutePath().endsWith(suffix)){
+					userID  = extractUserID(f.getName());
+					tweetCounties.add(userID);
+					if(m_sltCounties.contains(userID)){
+						Files.copy(f.toPath(), new File(testdir+f.getName()).toPath());
+						testCount++;
+						if(testCount%10 == 0)
+							System.out.print("o");
+					} else{
+						Files.copy(f.toPath(), new File(traindir+f.getName()).toPath());
+						trainCount++;
+						if(trainCount%10 == 0)
+							System.out.print("x");
+					}	
+				} else{
+					System.out.println(f.getName());
+					System.out.println("Wrong format in saving training and testing tweets.");
+				}
+			}
+		} catch(IOException e){
+			e.printStackTrace();
+		}
+		
+	}
 	public String findID(String[] strs){
 		// remove the left "
 		strs[0] = strs[0].substring(1, strs[0].length());
@@ -391,7 +428,7 @@ public class UserAnalyzer extends DocAnalyzer {
 	String[] m_demos = new String[]{"avgAge", "pctHisp", "pctWht", "pctBlck", "pctFml", "pctCllg", "pctCnsv", "pctUnemp"};
 	
 	// Generate the data in arff format for linear regression.
-	public void generateArffData(String filename, String att){
+	public void generateArffData(String filename, String att, boolean demo){
 		PrintWriter writer;
 		try{
 			writer = new PrintWriter(new File(filename));
@@ -402,13 +439,14 @@ public class UserAnalyzer extends DocAnalyzer {
 			for(String s: m_featureNames){
 				writer.write(String.format("@ATTRIBUTE %s\tNUMERIC\n", s));
 			}
-			for(String s: m_demos){
-				writer.write(String.format("@ATTRIBUTE %s\tNUMERIC\n", s));
+			if(demo){
+				for(String s: m_demos)
+					writer.write(String.format("@ATTRIBUTE %s\tNUMERIC\n", s));
 			}
 			writer.write("@ATTRIBUTE ylabel\tNUMERIC\n\n@Data\n");
 			for(_User u: m_users){
 				writer.write("{");
-				double[] vct = formatEachUserDemo(u, att);
+				double[] vct = demo ? formatEachUserDemo(u, att) : formatEachUser(u, att);
 				for(int i=0; i<vct.length; i++){
 					if(vct[i] != 0){
 						writer.write(String.format("%d %.4f", i, vct[i]));
@@ -496,5 +534,50 @@ public class UserAnalyzer extends DocAnalyzer {
 		else if(att.equals("Exp"))
 			vct[vct.length-1] = u.getExpScore();
 		return vct;
+	}
+	
+	// Save the IAT files into train/test files.
+	public void saveTrainTestIAT(String iat, String trainIAT, String testIAT){
+		try {
+			File file = new File(iat);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+			String line, countyID;			
+			String[] strs;
+			ArrayList<String> train = new ArrayList<String>();
+			ArrayList<String> test = new ArrayList<String>();
+			// Skip the first line since it is user name.
+			reader.readLine(); 
+
+			while((line = reader.readLine()) != null){
+				strs = line.replaceAll("\\s", "").split(",");
+				countyID = findID(strs);
+				iatCounties.add(countyID);
+				if(m_sltCounties.contains(countyID))
+					test.add(line);
+				else
+					train.add(line);
+			}
+			reader.close();
+			int count = 0;
+			for(String ic: iatCounties){
+				if(tweetCounties.contains(ic))
+					count++;
+				else
+					System.out.println(ic + " is missing.");
+			}
+			System.out.println(count);
+			// write out the train iats.
+			PrintWriter writer = new PrintWriter(new File(trainIAT));
+			for(String s: train)
+				writer.write(s+"\n");
+			writer.close();
+			// writer out the test iats.
+			writer = new PrintWriter(new File(testIAT));
+			for(String s: test)
+				writer.write(s+"\n");
+			writer.close();
+		} catch(IOException e){
+			e.printStackTrace();
+		}
 	}
 }

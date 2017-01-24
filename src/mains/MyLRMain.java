@@ -35,16 +35,13 @@ public class MyLRMain {
 			for(int k: ks){
 			String fv = "df"; //"df", "demo"
 			String type = "gay";// "black" or "gay"
-		
-//			String trainImpFile = String.format("/if15/lg5bt/ArffData/%s_train_imp_%s_%d.arff", type, fv, k);	
-//			String trainExpFile = String.format("/if15/lg5bt/ArffData/%s_train_exp_%s_%d.arff", type, fv, k);
-//			String testImpFile = String.format("/if15/lg5bt/ArffData/%s_test_imp_%s_%d.arff", type, fv, k);
-//			String testExpFile = String.format("/if15/lg5bt/ArffData/%s_test_exp_%s_%d.arff", type, fv, k);
-
-			String trainImpFile = String.format("./data/ArffData/%s_train_imp_%s_%d.arff", type, fv, k);	
-			String trainExpFile = String.format("./data/ArffData/%s_train_exp_%s_%d.arff", type, fv, k);
-			String testImpFile = String.format("./data/ArffData/%s_test_imp_%s_%d.arff", type, fv, k);
-			String testExpFile = String.format("./data/ArffData/%s_test_exp_%s_%d.arff", type, fv, k);
+			String data = "geo";
+			String prefix = "/if15/lg5bt/DSIData";//"./data"
+			
+			String trainImpFile = String.format("%s/%s/ArffData/%s_train_imp_%s_%d.arff", prefix, type, fv, k);	
+			String trainExpFile = String.format("%s/%s/ArffData/%s_train_exp_%s_%d.arff",prefix, type, fv, k);
+			String testImpFile = String.format("%s/%s/ArffData/%s_test_imp_%s_%d.arff", prefix, type, fv, k);
+			String testExpFile = String.format("%s/%s/ArffData/%s_test_exp_%s_%d.arff", prefix, type, fv, k);
 			
 			LinearRegression lr = new LinearRegression();
 			
@@ -53,38 +50,16 @@ public class MyLRMain {
 			Instances train = new Instances(trainReader);
 			train.setClassIndex(train.numAttributes() - 1);
 			lr.buildClassifier(train);
-			
-			int topK = 100;		
-			// Sort the weights of the learned features.
-			double[] weights = lr.coefficients();
-			MyPriorityQueue<_RankItem> rankq = new MyPriorityQueue<_RankItem>(topK);
-			for(int i=0; i<weights.length; i++){
-				rankq.add(new _RankItem(i, weights[i]));
-			}
-			String[] topFvs = new String[topK];
-			int in = 0;
-			for(_RankItem it: rankq){
-				topFvs[in++] = train.attribute(it.m_index).name();
-			}
-			
-			try{
-				PrintWriter writer = new PrintWriter(new File(String.format("./data/%s_imp_top_%d.txt", type, topK)));
-				for(String f: topFvs)
-					writer.write(f+"\n");
-				writer.close();
-			} catch(IOException e){
-				e.printStackTrace();
-			}			
-			
-//			System.out.println(String.format("Start loading %s testing data from %s....", type, testImpFile));
-//			BufferedReader testReader = new BufferedReader(new FileReader(testImpFile));
-//			Instances test = new Instances(testReader);
-//			test.setClassIndex(test.numAttributes() - 1);
 
-//			System.out.println("Start evaluation...");
-//			Evaluation eval = new Evaluation(train);
-//			eval.evaluateModel(lr, test);
-//			System.out.println(eval.toSummaryString("\nResults For Implicit Attitudes\n======\n", false));
+			System.out.println(String.format("Start loading %s testing data from %s....", type, testImpFile));
+			BufferedReader testReader = new BufferedReader(new FileReader(testImpFile));
+			Instances test = new Instances(testReader);
+			test.setClassIndex(test.numAttributes() - 1);
+
+			System.out.println("Start evaluation...");
+			Evaluation eval = new Evaluation(train);
+			eval.evaluateModel(lr, test);
+			System.out.println(eval.toSummaryString("\nResults For Implicit Attitudes\n======\n", false));
 			
 			System.out.println(String.format("Start loading %s training data from %s....", type, trainExpFile));
 			trainReader = new BufferedReader(new FileReader(trainExpFile));
@@ -92,31 +67,31 @@ public class MyLRMain {
 			train.setClassIndex(train.numAttributes() - 1);
 			lr.buildClassifier(train);
 			
-//			System.out.println(String.format("Start loading %s testing data from %s....", type, testExpFile));
-//			testReader = new BufferedReader(new FileReader(testExpFile));
-//			test = new Instances(testReader);
-//			test.setClassIndex(test.numAttributes() - 1);
-//
-//			System.out.println("Start evaluation...");
-//			eval = new Evaluation(train);
-//			eval.evaluateModel(lr, test);
-//			System.out.println(eval.toSummaryString("\nResults for Explicit Results\n======\n", false));
+			System.out.println(String.format("Start loading %s testing data from %s....", type, testExpFile));
+			testReader = new BufferedReader(new FileReader(testExpFile));
+			test = new Instances(testReader);
+			test.setClassIndex(test.numAttributes() - 1);
+
+			System.out.println("Start evaluation...");
+			eval = new Evaluation(train);
+			eval.evaluateModel(lr, test);
+			System.out.println(eval.toSummaryString("\nResults for Explicit Results\n======\n", false));
 			
 			
 			// Sort the weights of the learned features.
-			weights = lr.coefficients();
-			rankq = new MyPriorityQueue<_RankItem>(topK);
+			double[] weights = lr.coefficients();
+			MyPriorityQueue<_RankItem> rankq = new MyPriorityQueue<_RankItem>(k);
 			for(int i=0; i<weights.length; i++){
-				rankq.add(new _RankItem(i, weights[i]));
+				rankq.add(new _RankItem(i, Math.abs(weights[i])));
 			}
-			topFvs = new String[topK];
-			in = 0;
+			String[] topFvs = new String[k];
+			int in = 0;
 			for(_RankItem it: rankq){
 				topFvs[in++] = train.attribute(it.m_index).name();
 			}
 			
 			try{
-				PrintWriter writer = new PrintWriter(new File(String.format("./data/%s_exp_top_%d.txt", type, topK)));
+				PrintWriter writer = new PrintWriter(new File(String.format("./data/%s/%s_exp_top_%d.txt", data, type, k)));
 				for(String f: topFvs)
 					writer.write(f+"\n");
 				writer.close();

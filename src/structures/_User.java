@@ -333,7 +333,8 @@ public class _User {
 		double m_pctUnemp;
 		
 		public Demographics(String[] strs){
-			m_avgAge = Double.parseDouble(strs[7]);
+			// All other demo params are in range[0,1], so set this one to be in the range too.
+			m_avgAge = Double.parseDouble(strs[7])/100; 
 			m_pctHisp = Double.parseDouble(strs[8]);
 			m_pctWht = Double.parseDouble(strs[9]);
 			m_pctBlck = Double.parseDouble(strs[10]);
@@ -349,12 +350,14 @@ public class _User {
 			return demo;
 		}
 	}
-	Demographics m_dmg;
+	Demographics m_dmg = null;
 	public void setDemographics(String[] strs){
 		m_dmg = new Demographics(strs);
 	}
 	
 	public double[] getDemographics(){
+		if(m_dmg == null)
+			System.out.println(m_userID);
 		return m_dmg.getNormDemo();
 	}
  }

@@ -1,4 +1,5 @@
 bin/
 data/
+preData/
 .DS_Store
 .classpath
