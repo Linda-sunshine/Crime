@@ -121,57 +121,57 @@ public class MyPreProcessMain {
 				}
 			}
 			System.out.println(topFvs.size() + " features are selected for imp attitudes.");
-			try{
-				PrintWriter writer = new PrintWriter(new File(String.format("%s/%s/%s_toplr_%d_imp.txt", prefix, data, type, k)));
-				for(String f: topFvs)
-					writer.write(f+"\n");
-				writer.close();
-			} catch(IOException e){
-				e.printStackTrace();
-			}
-			
-			/***Explicit attitudes.****/
-			System.out.println(String.format("Start loading %s training data from %s....", type, trainExpFile));
-			trainReader = new BufferedReader(new FileReader(trainExpFile));
-			train = new Instances(trainReader);
-			System.out.print("Total number of attributes is "+train.numAttributes());
-			train.setClassIndex(train.numAttributes() - 1);
-			lr.buildClassifier(train);
-		
-			System.out.println(String.format("Start loading %s testing data from %s....", type, testExpFile));
-			testReader = new BufferedReader(new FileReader(testExpFile));
-			test = new Instances(testReader);
-			test.setClassIndex(test.numAttributes() - 1);
-
-			System.out.println("Start evaluation...");
-			eval = new Evaluation(train);
-			eval.evaluateModel(lr, test);
-			System.out.println(eval.toSummaryString("\nResults for Explicit Results\n======\n", false));
-			
-			rankq.clear();
-			topFvs.clear();
-			/***Write out the selected features.**/
-			weights = lr.coefficients();
-			for(int i=0; i<weights.length-1; i++){
-				rankq.add(new _RankItem(i, Math.abs(weights[i])));
-			}
-			for(_RankItem it: rankq){
-				if(it.m_value > 0){
-					System.out.print(String.format("(%.3f,%d)\t", it.m_value, it.m_index));
-					System.out.println( train.attribute(it.m_index).name());
-					topFvs.add(train.attribute(it.m_index).name());
-				}
-			}
-			System.out.println(topFvs.size() + " features are selected for exp attitudes.");
-		
-			try{
-				PrintWriter writer = new PrintWriter(new File(String.format("%s/%s/%s_toplr_%d_exp.txt", prefix, data, type, k)));
-				for(String f: topFvs)
-					writer.write(f+"\n");
-				writer.close();
-			} catch(IOException e){
-				e.printStackTrace();
-			}
+//			try{
+//				PrintWriter writer = new PrintWriter(new File(String.format("%s/%s/%s_toplr_%d_imp.txt", prefix, data, type, k)));
+//				for(String f: topFvs)
+//					writer.write(f+"\n");
+//				writer.close();
+//			} catch(IOException e){
+//				e.printStackTrace();
+//			}
+//			
+//			/***Explicit attitudes.****/
+//			System.out.println(String.format("Start loading %s training data from %s....", type, trainExpFile));
+//			trainReader = new BufferedReader(new FileReader(trainExpFile));
+//			train = new Instances(trainReader);
+//			System.out.print("Total number of attributes is "+train.numAttributes());
+//			train.setClassIndex(train.numAttributes() - 1);
+//			lr.buildClassifier(train);
+//		
+//			System.out.println(String.format("Start loading %s testing data from %s....", type, testExpFile));
+//			testReader = new BufferedReader(new FileReader(testExpFile));
+//			test = new Instances(testReader);
+//			test.setClassIndex(test.numAttributes() - 1);
+//
+//			System.out.println("Start evaluation...");
+//			eval = new Evaluation(train);
+//			eval.evaluateModel(lr, test);
+//			System.out.println(eval.toSummaryString("\nResults for Explicit Results\n======\n", false));
+//			
+//			rankq.clear();
+//			topFvs.clear();
+//			/***Write out the selected features.**/
+//			weights = lr.coefficients();
+//			for(int i=0; i<weights.length-1; i++){
+//				rankq.add(new _RankItem(i, Math.abs(weights[i])));
+//			}
+//			for(_RankItem it: rankq){
+//				if(it.m_value > 0){
+//					System.out.print(String.format("(%.3f,%d)\t", it.m_value, it.m_index));
+//					System.out.println( train.attribute(it.m_index).name());
+//					topFvs.add(train.attribute(it.m_index).name());
+//				}
+//			}
+//			System.out.println(topFvs.size() + " features are selected for exp attitudes.");
+//		
+//			try{
+//				PrintWriter writer = new PrintWriter(new File(String.format("%s/%s/%s_toplr_%d_exp.txt", prefix, data, type, k)));
+//				for(String f: topFvs)
+//					writer.write(f+"\n");
+//				writer.close();
+//			} catch(IOException e){
+//				e.printStackTrace();
+//			}
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
