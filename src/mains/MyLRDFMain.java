@@ -22,7 +22,7 @@ import weka.classifiers.functions.LinearRegression;
 import weka.core.Instances;
 import Analyzer.UserAnalyzer;
 
-public class MyPreProcessMain {
+public class MyLRDFMain {
 
 	//In the main function, we want to input the data and do adaptation 
 	public static void main(String[] args) throws InvalidFormatException, FileNotFoundException, IOException{
@@ -121,14 +121,14 @@ public class MyPreProcessMain {
 				}
 			}
 			System.out.println(topFvs.size() + " features are selected for imp attitudes.");
-//			try{
-//				PrintWriter writer = new PrintWriter(new File(String.format("%s/%s/%s_toplr_%d_imp.txt", prefix, data, type, k)));
-//				for(String f: topFvs)
-//					writer.write(f+"\n");
-//				writer.close();
-//			} catch(IOException e){
-//				e.printStackTrace();
-//			}
+			try{
+				PrintWriter writer = new PrintWriter(new File(String.format("%s/%s/%s_toplr_%d_imp.txt", prefix, data, type, k)));
+				for(String f: topFvs)
+					writer.write(f+"\n");
+				writer.close();
+			} catch(IOException e){
+				e.printStackTrace();
+			}
 //			
 //			/***Explicit attitudes.****/
 //			System.out.println(String.format("Start loading %s training data from %s....", type, trainExpFile));

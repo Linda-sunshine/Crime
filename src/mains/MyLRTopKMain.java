@@ -26,7 +26,7 @@ import Classifier.supervised.GlobalSVM;
 import Classifier.supervised.SVM;
 import Classifier.supervised.modelAdaptation.HDP.MTCLRWithHDP;
 
-public class MyLRMain {
+public class MyLRTopKMain {
 	
 	//In the main function, we want to input the data and do adaptation 
 	public static void main(String[] args) throws InvalidFormatException, FileNotFoundException, IOException{
@@ -43,7 +43,7 @@ public class MyLRMain {
 //			String prefix = "./data";
 			
 			String data = "geo";
-			String fv = "df";
+			String fv = "toplr";
 			String type = "black";// "black" or "gay"
 			String suffix = ".csv";
 			boolean demo = false;// whether we include the demo in the training.
@@ -58,6 +58,7 @@ public class MyLRMain {
 			String trainFile = String.format("%s/%s/ArffData/%s_train_%s_%s_%d_demo_%b.arff", prefix, data, type, att, fv, k, demo);	
 			String testFile = String.format("%s/%s/ArffData/%s_test_%s_%s_%d_demo_%b.arff", prefix, data, type, att, fv, k, demo);
 				
+			System.out.print(String.format("[Info]k:%d,data:%s,fv:%s,type:%s,demo:%b,att:%s\n",k,data,fv,type,demo,att));
 			/***Generate training Arff files based on the selected features.***/
 			System.out.println(String.format("Start generating %s training tweets....", type));
 			UserAnalyzer train_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
@@ -92,30 +93,7 @@ public class MyLRMain {
 			Evaluation eval = new Evaluation(train);
 			eval.evaluateModel(lr, test);
 			System.out.println(eval.toSummaryString(String.format("\nResults For %s Attitudes\n======\n", att), false));
-			
-//			// Sort the weights of the learned features.
-//			ArrayList<String> topFvs = new ArrayList<String>();
-//			double[] weights = lr.coefficients();
-//			MyPriorityQueue<_RankItem> rankq = new MyPriorityQueue<_RankItem>(k);
-//			for(int i=0; i<weights.length; i++)
-//				rankq.add(new _RankItem(i, Math.abs(weights[i])));
-//			
-//			for(_RankItem it: rankq){
-//				if(it.m_value > 0){
-//					System.out.print(String.format("(%.3f,%d)\t", it.m_value, it.m_index));
-//					System.out.println( train.attribute(it.m_index).name());
-//					topFvs.add(train.attribute(it.m_index).name());
-//				}
-//			}
-//			System.out.print(String.format("%d features are selected for %s attitudes.\n", topFvs.size(), att));
-//			try{
-//				PrintWriter writer = new PrintWriter(new File(String.format("%s/%s/%s_toplr_%d_%s_demo_%b.txt", prefix, data, type, k, att, demo)));
-//				for(String f: topFvs)
-//					writer.write(f+"\n");
-//				writer.close();
-//			} catch(IOException e){
-//				e.printStackTrace();
-//			}
+
 		} catch(Exception e1){
 			e1.printStackTrace();
 		}

@@ -471,9 +471,9 @@ public class UserAnalyzer extends DocAnalyzer {
 			}
 		}
 		Utils.L2Normalization(vct);
-		if(att.equals("Imp"))
+		if(att.equals("imp"))
 			vct[vct.length-1] = u.getImpScore();
-		else if(att.equals("Exp"))
+		else if(att.equals("exp"))
 			vct[vct.length-1] = u.getExpScore();
 		return vct;
 	}
@@ -529,9 +529,9 @@ public class UserAnalyzer extends DocAnalyzer {
 			vct[getFeatureSize() + 1 + i] = demo[i];
 		}
 		Utils.L2Normalization(vct);
-		if(att.equals("Imp"))
+		if(att.equals("imp"))
 			vct[vct.length-1] = u.getImpScore();
-		else if(att.equals("Exp"))
+		else if(att.equals("exp"))
 			vct[vct.length-1] = u.getExpScore();
 		return vct;
 	}
