@@ -51,10 +51,10 @@ public class MyLRDFMain {
 		String trainIAT = String.format("%s/%s/%sTrainIAT.csv", prefix, data, type);
 		String testIAT = String.format("%s/%s/%sTestIAT.csv", prefix, data, type);
 			
-		String trainImpFile = String.format("%s/%s/ArffData/%s_train_imp_%s_%d.arff", prefix, data, type, fv, k);	
-		String trainExpFile = String.format("%s/%s/ArffData/%s_train_exp_%s_%d.arff",prefix, data, type, fv, k);
-		String testImpFile = String.format("%s/%s/ArffData/%s_test_imp_%s_%d.arff", prefix, data, type, fv, k);
-		String testExpFile = String.format("%s/%s/ArffData/%s_test_exp_%s_%d.arff", prefix, data, type, fv, k);
+		String trainImpFile = String.format("%s/%s/ArffData/%s_train_imp_%s_%d_demo_%b.arff", prefix, data, type, fv, k, demo);	
+		String trainExpFile = String.format("%s/%s/ArffData/%s_train_exp_%s_%d_demo_%b.arff",prefix, data, type, fv, k, demo);
+		String testImpFile = String.format("%s/%s/ArffData/%s_test_imp_%s_%d_demo_%b.arff", prefix, data, type, fv, k, demo);
+		String testExpFile = String.format("%s/%s/ArffData/%s_test_exp_%s_%d_demo_%b.arff", prefix, data, type, fv, k, demo);
 
 		/***Feature selection based on DF.****/
 //		int maxDF = -1, minDF = 0;
@@ -63,25 +63,25 @@ public class MyLRDFMain {
 //		fs_analyzer.LoadStopwords(stopwords);
 //		fs_analyzer.loadUserDir(tweetTrain, suffix);
 //		fs_analyzer.featureSelection(features, "DF", maxDF, minDF, k);
-//		
-//		/***Generate training Arff files based on the selected features.***/
+		
+		/***Generate training Arff files based on the selected features.***/
 //		System.out.println(String.format("Start generating %s training tweets....", type));
 //		UserAnalyzer train_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
 //		train_analyzer.LoadStopwords(stopwords);
 //		train_analyzer.loadUserDir(tweetTrain, suffix);
 //		train_analyzer.loadIAT(trainIAT);
 //		train_analyzer.setFeatureValues("TFIDF", 2);
-//		train_analyzer.generateArffData(trainImpFile, "Imp", demo);
-//		train_analyzer.generateArffData(trainExpFile, "Exp", demo);
-//		
-//		/***Generate testing Arff files based on the selected features.***/
-//		System.out.println(String.format("Start generating %s testing tweets....", type));
-//		UserAnalyzer test_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
-//		test_analyzer.loadUserDir(tweetTest, suffix);
-//		test_analyzer.loadIAT(testIAT);
-//		test_analyzer.setFeatureValues("TFIDF", 2);
-//		test_analyzer.generateArffData(testImpFile, "Imp", demo);
-//		test_analyzer.generateArffData(testExpFile, "Exp", demo);
+//		train_analyzer.generateArffData(trainImpFile, "imp", demo);
+//		train_analyzer.generateArffData(trainExpFile, "exp", demo);
+		
+		/***Generate testing Arff files based on the selected features.***/
+		System.out.println(String.format("Start generating %s testing tweets....", type));
+		UserAnalyzer test_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
+		test_analyzer.loadUserDir(tweetTest, suffix);
+		test_analyzer.loadIAT(testIAT);
+		test_analyzer.setFeatureValues("TFIDF", 2);
+		test_analyzer.generateArffData(testImpFile, "imp", demo);
+		test_analyzer.generateArffData(testExpFile, "exp", demo);
 		
 		ArrayList<String> topFvs = new ArrayList<String>();
 		double[] weights;
@@ -129,49 +129,49 @@ public class MyLRDFMain {
 			} catch(IOException e){
 				e.printStackTrace();
 			}
-//			
-//			/***Explicit attitudes.****/
-//			System.out.println(String.format("Start loading %s training data from %s....", type, trainExpFile));
-//			trainReader = new BufferedReader(new FileReader(trainExpFile));
-//			train = new Instances(trainReader);
-//			System.out.print("Total number of attributes is "+train.numAttributes());
-//			train.setClassIndex(train.numAttributes() - 1);
-//			lr.buildClassifier(train);
-//		
-//			System.out.println(String.format("Start loading %s testing data from %s....", type, testExpFile));
-//			testReader = new BufferedReader(new FileReader(testExpFile));
-//			test = new Instances(testReader);
-//			test.setClassIndex(test.numAttributes() - 1);
-//
-//			System.out.println("Start evaluation...");
-//			eval = new Evaluation(train);
-//			eval.evaluateModel(lr, test);
-//			System.out.println(eval.toSummaryString("\nResults for Explicit Results\n======\n", false));
-//			
-//			rankq.clear();
-//			topFvs.clear();
-//			/***Write out the selected features.**/
-//			weights = lr.coefficients();
-//			for(int i=0; i<weights.length-1; i++){
-//				rankq.add(new _RankItem(i, Math.abs(weights[i])));
-//			}
-//			for(_RankItem it: rankq){
-//				if(it.m_value > 0){
-//					System.out.print(String.format("(%.3f,%d)\t", it.m_value, it.m_index));
-//					System.out.println( train.attribute(it.m_index).name());
-//					topFvs.add(train.attribute(it.m_index).name());
-//				}
-//			}
-//			System.out.println(topFvs.size() + " features are selected for exp attitudes.");
-//		
-//			try{
-//				PrintWriter writer = new PrintWriter(new File(String.format("%s/%s/%s_toplr_%d_exp.txt", prefix, data, type, k)));
-//				for(String f: topFvs)
-//					writer.write(f+"\n");
-//				writer.close();
-//			} catch(IOException e){
-//				e.printStackTrace();
-//			}
+			
+			/***Explicit attitudes.****/
+			System.out.println(String.format("Start loading %s training data from %s....", type, trainExpFile));
+			trainReader = new BufferedReader(new FileReader(trainExpFile));
+			train = new Instances(trainReader);
+			System.out.print("Total number of attributes is "+train.numAttributes());
+			train.setClassIndex(train.numAttributes() - 1);
+			lr.buildClassifier(train);
+		
+			System.out.println(String.format("Start loading %s testing data from %s....", type, testExpFile));
+			testReader = new BufferedReader(new FileReader(testExpFile));
+			test = new Instances(testReader);
+			test.setClassIndex(test.numAttributes() - 1);
+
+			System.out.println("Start evaluation...");
+			eval = new Evaluation(train);
+			eval.evaluateModel(lr, test);
+			System.out.println(eval.toSummaryString("\nResults for Explicit Results\n======\n", false));
+			
+			rankq.clear();
+			topFvs.clear();
+			/***Write out the selected features.**/
+			weights = lr.coefficients();
+			for(int i=0; i<weights.length-1; i++){
+				rankq.add(new _RankItem(i, Math.abs(weights[i])));
+			}
+			for(_RankItem it: rankq){
+				if(it.m_value > 0){
+					System.out.print(String.format("(%.3f,%d)\t", it.m_value, it.m_index));
+					System.out.println( train.attribute(it.m_index).name());
+					topFvs.add(train.attribute(it.m_index).name());
+				}
+			}
+			System.out.println(topFvs.size() + " features are selected for exp attitudes.");
+		
+			try{
+				PrintWriter writer = new PrintWriter(new File(String.format("%s/%s/%s_toplr_%d_exp.txt", prefix, data, type, k)));
+				for(String f: topFvs)
+					writer.write(f+"\n");
+				writer.close();
+			} catch(IOException e){
+				e.printStackTrace();
+			}
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

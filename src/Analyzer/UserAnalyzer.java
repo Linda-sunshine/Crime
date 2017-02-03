@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -111,6 +112,7 @@ public class UserAnalyzer extends DocAnalyzer {
 		File dir = new File(folder);
 		for(File f: dir.listFiles()){
 			if(f.isFile() && f.getAbsolutePath().endsWith(suffix)){
+//				System.out.println(f.getName());
 				loadUser(f.getAbsolutePath());
 				fCount++;
 				if(fCount%10 == 0)
@@ -215,6 +217,47 @@ public class UserAnalyzer extends DocAnalyzer {
 		} catch(IOException e){
 			e.printStackTrace();
 		}
+	}
+	
+	HashMap<Double, String> m_iatCountyMap = new HashMap<Double, String>();
+	DecimalFormat m_df = new DecimalFormat("#.0000");
+	public void buildIATMap(String filename, String att){
+		try {
+			File file = new File(filename);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+			String line, countyID;			
+			String[] strs;
+
+			// Skip the first line since it is user name.
+//			reader.readLine(); 
+			int count = 0;
+			double iat = 0;
+			
+			while((line = reader.readLine()) != null){
+				strs = line.replaceAll("\\s", "").split(",");
+				
+				if(att.equals("imp"))
+					iat = Double.valueOf(m_df.format(Double.valueOf(strs[3])));
+				else if(att.equals("exp"))
+					iat = Double.valueOf(m_df.format(Double.valueOf(strs[5])));
+				else
+					System.out.println("Attitude not supported!");
+				
+				countyID = findID(strs);
+				if(!m_iatCountyMap.containsKey(iat)){
+					count++;
+					m_iatCountyMap.put(iat, countyID);
+				} else
+					System.out.println(countyID + " The same attitude value!");
+			}
+			System.out.println("the number of counties of iat score "+count);
+			reader.close();
+		} catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+	public HashMap<Double, String> getIATMap(){
+		return m_iatCountyMap;
 	}
 	ArrayList<String> m_counties = new ArrayList<String>();
 	HashSet<String> m_sltCounties = new HashSet<String>();
