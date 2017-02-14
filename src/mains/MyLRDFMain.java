@@ -39,7 +39,7 @@ public class MyLRDFMain {
 //		String prefix = "./data";
 		String data = "geo";
 		String fv = "df";
-		String type = "black";// "black" or "gay"
+		String type = "gay";// "black" or "gay"
 		String suffix = ".csv";
 		boolean demo = false;// whether we include the demo in the training.
 		
@@ -57,22 +57,22 @@ public class MyLRDFMain {
 		String testExpFile = String.format("%s/%s/ArffData/%s_test_exp_%s_%d_demo_%b.arff", prefix, data, type, fv, k, demo);
 
 		/***Feature selection based on DF.****/
-//		int maxDF = -1, minDF = 0;
-//		System.out.println(String.format("Start generating %s features based on DF....", type));
-//		UserAnalyzer fs_analyzer = new UserAnalyzer(tokenModel, classNumber, null, Ngram, lengthThreshold, false);
-//		fs_analyzer.LoadStopwords(stopwords);
-//		fs_analyzer.loadUserDir(tweetTrain, suffix);
-//		fs_analyzer.featureSelection(features, "DF", maxDF, minDF, k);
+		int maxDF = -1, minDF = 0;
+		System.out.println(String.format("Start generating %s features based on DF....", type));
+		UserAnalyzer fs_analyzer = new UserAnalyzer(tokenModel, classNumber, null, Ngram, lengthThreshold, false);
+		fs_analyzer.LoadStopwords(stopwords);
+		fs_analyzer.loadUserDir(tweetTrain, suffix);
+		fs_analyzer.featureSelection(features, "DF", maxDF, minDF, k);
 		
 		/***Generate training Arff files based on the selected features.***/
-//		System.out.println(String.format("Start generating %s training tweets....", type));
-//		UserAnalyzer train_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
-//		train_analyzer.LoadStopwords(stopwords);
-//		train_analyzer.loadUserDir(tweetTrain, suffix);
-//		train_analyzer.loadIAT(trainIAT);
-//		train_analyzer.setFeatureValues("TFIDF", 2);
-//		train_analyzer.generateArffData(trainImpFile, "imp", demo);
-//		train_analyzer.generateArffData(trainExpFile, "exp", demo);
+		System.out.println(String.format("Start generating %s training tweets....", type));
+		UserAnalyzer train_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
+		train_analyzer.LoadStopwords(stopwords);
+		train_analyzer.loadUserDir(tweetTrain, suffix);
+		train_analyzer.loadIAT(trainIAT);
+		train_analyzer.setFeatureValues("TFIDF", 2);
+		train_analyzer.generateArffData(trainImpFile, "imp", demo);
+		train_analyzer.generateArffData(trainExpFile, "exp", demo);
 		
 		/***Generate testing Arff files based on the selected features.***/
 		System.out.println(String.format("Start generating %s testing tweets....", type));

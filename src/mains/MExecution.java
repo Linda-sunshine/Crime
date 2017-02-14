@@ -12,7 +12,7 @@ import weka.classifiers.functions.LinearRegression;
 import weka.core.Instances;
 import Analyzer.UserAnalyzer;
 
-public class Execution {
+public class MExecution {
 	//In the main function, we want to input the data and do adaptation 
 	public static void main(String[] args) throws InvalidFormatException, FileNotFoundException, IOException{
 		try{
@@ -37,20 +37,20 @@ public class Execution {
 				
 			System.out.print(String.format("[Info]k:%d,data:%s,fv:%s,type:%s,demo:%b,att:%s\n",param.m_k,param.m_data,param.m_fv,param.m_type,param.m_demo,param.m_att));
 			
-			/***Generate training Arff files based on the selected features.***/
-			System.out.println(String.format("Start generating %s training tweets....", param.m_type));
-			UserAnalyzer train_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
-			train_analyzer.LoadStopwords(stopwords);
-			train_analyzer.loadUserDir(tweetTrain, param.m_suffix);
-			train_analyzer.loadIAT(trainIAT);
-			train_analyzer.setFeatureValues("TFIDF", 2);
-			train_analyzer.generateArffData(trainFile, param.m_att, param.m_demo);
+//			/***Generate training Arff files based on the selected features.***/
+//			System.out.println(String.format("Start generating %s training tweets....", param.m_type));
+//			UserAnalyzer train_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
+//			train_analyzer.LoadStopwords(stopwords);
+//			train_analyzer.loadUserDir(tweetTrain, param.m_suffix);
+//			train_analyzer.loadIAT(trainIAT);
+//			train_analyzer.setFeatureValues("TFIDF", 2);
+//			train_analyzer.generateArffData(trainFile, param.m_att, param.m_demo);
 			
 			/***Generate testing Arff files based on the selected features.***/
 			System.out.println(String.format("Start generating %s testing tweets....", param.m_type));
 			UserAnalyzer test_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
-			test_analyzer.loadUserDir(tweetTest, param.m_suffix);
-			test_analyzer.loadIAT(testIAT);
+//			test_analyzer.loadUserDir(param.m_tweetTest, param.m_suffix);
+//			test_analyzer.loadIAT(param.m_testIAT);
 			test_analyzer.setFeatureValues("TFIDF", 2);
 			test_analyzer.generateArffData(testFile, param.m_att, param.m_demo);
 			

@@ -60,16 +60,18 @@ public class MPredictMain {
 		String stopwords = "./data/Model/stopwords.dat";
 		
 		int k = 2000;
-//		String prefix = "/if15/lg5bt/DSIData";//"./data"
-		String prefix = "./data";
+		String prefix = "/if15/lg5bt/DSIData";//"./data"
+//		String prefix = "./data";
 		String data = "geo";
 		
 		for(String fv: new String[]{"df", "toplr"}){
 			for(boolean demo: new boolean[]{false, true}){
-//		String fv = "toplr";
-		String type = "black";// "black" or "gay"
+//		for(int k: new int[]{2000, 3000, 4000}){
+			for(String att: new String[]{"imp", "exp"}){
+//		String fv = "df";
+		String type = "gay";// "black" or "gay"
 		String suffix = ".csv";
-		String att = "imp";
+//		String att = "imp";
 //		boolean demo = false;// whether we include the demo in the training.
 		
 //		String tweetTrain = String.format("%s/%s/tweetSplit/tweetsTrain/", prefix, data);
@@ -194,6 +196,6 @@ public class MPredictMain {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-	}}
+	}}}
 	}
 }
