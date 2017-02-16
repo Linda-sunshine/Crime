@@ -27,8 +27,8 @@ public class JSeedMain {
 		String stopwords = "./data/Model/stopwords.dat";
 		
 		int k = 2000;
-		String prefix = "/if15/lg5bt/DSIData";//"./data"
-//		String prefix = "./data";
+//		String prefix = "/if15/lg5bt/DSIData";//"./data"
+		String prefix = "./data";
 		String data = "geo";
 
 		String fv = "seed";
