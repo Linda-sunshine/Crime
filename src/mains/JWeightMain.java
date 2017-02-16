@@ -16,12 +16,8 @@ import org.apache.commons.math3.*;
 import org.apache.commons.math3.stat.inference.TTest;
 
 
-public class JSeedMain {
+public class JWeightMain {
 	public static void main(String[] args) throws Exception{
-		
-		int classNumber = 2;
-		int Ngram = 2; // The default value is unigram.
-		int lengthThreshold = 0; // Document length threshold
 
 		String tokenModel = "./data/Model/en-token.bin"; // Token model.
 		String stopwords = "./data/Model/stopwords.dat";
@@ -31,48 +27,37 @@ public class JSeedMain {
 		String prefix = "./data";
 		String data = "geo";
 
-		String fv = "seed";
-		String type = "gay";// "black" or "gay"
+		String fv = "df";
+		for(String type: new String[]{"black", "gay"}){
+			for(String att: new String[]{"imp", "exp"}){
+		
+//		String type = "gay";// "black" or "gay"
 		String suffix = ".csv";
-		String att = "imp";
+//		String att = "imp";
 		boolean demo = false;// whether we include the demo in the training.
 		
-		// Specify the feature file with seed words.
-		if(fv.equals("seed")){
-			if(type.equals("black"))
-				k = 21;
-			else 
-				k = 9;
-		}
-		String tweetTrain = String.format("%s/%s/tweetSplit/tweetsTrain/", prefix, data);
-		String tweetTest = String.format("%s/%s/tweetSplit/tweetsTest/", prefix, data);
-		String features = String.format("%s/%s/%s_%s_%d.txt", prefix, data, type, fv, k);
-
-		String trainIAT = String.format("%s/%s/%sTrainIAT.csv", prefix, data, type);
-		String testIAT = String.format("%s/%s/%sTestIAT.csv", prefix, data, type);
-			
 		String trainFile = String.format("%s/%s/ArffData/%s_train_%s_%s_%d_demo_%b.arff", prefix, data, type, att, fv, k, demo);	
 		String testFile = String.format("%s/%s/ArffData/%s_test_%s_%s_%d_demo_%b.arff", prefix, data, type, att, fv, k, demo);
 		String sortFile = String.format("%s/%s/Results/%s_sort_%s_%s_%d_demo_%b.txt", prefix, data, type, att, fv, k, demo);
 
 		System.out.print(String.format("[Info]k:%d,data:%s,fv:%s,type:%s,demo:%b,att:%s\n",k,data,fv,type,demo,att));
 		
-		/***Generate training Arff files based on the selected features.***/
-		System.out.println(String.format("Start generating %s training tweets....", type));
-		UserAnalyzer train_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
-		train_analyzer.LoadStopwords(stopwords);
-		train_analyzer.loadUserDir(tweetTrain, suffix);
-		train_analyzer.loadIAT(trainIAT);
-		train_analyzer.setFeatureValues("TFIDF", 2);
-		train_analyzer.generateArffData(trainFile, att, demo);
-		
-		/***Generate testing Arff files based on the selected features.***/
-		System.out.println(String.format("Start generating %s testing tweets....", type));
-		UserAnalyzer test_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
-		test_analyzer.loadUserDir(tweetTest, suffix);
-		test_analyzer.loadIAT(testIAT);
-		test_analyzer.setFeatureValues("TFIDF", 2);
-		test_analyzer.generateArffData(testFile, att, demo);
+//		/***Generate training Arff files based on the selected features.***/
+//		System.out.println(String.format("Start generating %s training tweets....", type));
+//		UserAnalyzer train_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
+//		train_analyzer.LoadStopwords(stopwords);
+//		train_analyzer.loadUserDir(tweetTrain, suffix);
+//		train_analyzer.loadIAT(trainIAT);
+//		train_analyzer.setFeatureValues("TFIDF", 2);
+//		train_analyzer.generateArffData(trainFile, att, demo);
+//		
+//		/***Generate testing Arff files based on the selected features.***/
+//		System.out.println(String.format("Start generating %s testing tweets....", type));
+//		UserAnalyzer test_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
+//		test_analyzer.loadUserDir(tweetTest, suffix);
+//		test_analyzer.loadIAT(testIAT);
+//		test_analyzer.setFeatureValues("TFIDF", 2);
+//		test_analyzer.generateArffData(testFile, att, demo);
 		
 		LinearRegression lr = new LinearRegression();
 		
@@ -94,9 +79,10 @@ public class JSeedMain {
 
 		// seed words list.
 		double[] weights = lr.coefficients();
-		MyPriorityQueue<_RankItem> rankq = new MyPriorityQueue<_RankItem>(100);
+		MyPriorityQueue<_RankItem> rankq = new MyPriorityQueue<_RankItem>(k);
 		for(int i=0; i<weights.length-1; i++){
-			rankq.add(new _RankItem(i, weights[i]));
+			if(weights[i] != 0)
+				rankq.add(new _RankItem(i, weights[i]));
 		}
 		double[] zeros = new double[weights.length];
 		TTest t = new TTest();
@@ -113,4 +99,4 @@ public class JSeedMain {
 			e.printStackTrace();
 		}
 	}
-}
+}}}

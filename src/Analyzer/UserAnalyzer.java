@@ -171,6 +171,7 @@ public class UserAnalyzer extends DocAnalyzer {
 //					System.out.println(t.getSource());
 //			}
 			if(tweets.size() >= 1){//at least one for adaptation and one for testing
+				System.out.println("====The county contains seed words.====");
 				if(!m_countyNameTweetsMap.containsKey(countyID)){
 					_User cur = new _User(countyID, m_classNo, tweets);
 					m_countyNameTweetsMap.put(countyID, cur);

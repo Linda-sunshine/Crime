@@ -35,6 +35,7 @@ import structures._Doc;
 import structures._Post;
 import structures._Product;
 import structures._Stn;
+import structures._stat;
 import utils.Utils;
 
 /**
@@ -456,7 +457,19 @@ public class DocAnalyzer extends Analyzer {
 			return false;
 		}
 	}
-	
+	//Add one more token to the current vocabulary.
+	protected void expandVocabulary(String token) {
+		String[] tokens = Tokenizer(token); //Original tokens.
+		
+		//Normalize them and stem them.		
+		for(int i = 0; i < tokens.length; i++)
+			tokens[i] = SnowballStemming(Normalize(tokens[i]));
+		
+		String fv = tokens[0];
+		m_featureNameIndex.put(fv, m_featureNames.size()); // set the index of the new feature.
+		m_featureNames.add(fv); // Add the new feature.
+		m_featureStat.put(fv, new _stat(m_classNo));
+	}
 	protected boolean AnalyzeDocByStn(_Doc doc, String[] sentences) {
 		TokenizeResult result;
 		int y = doc.getYLabel(), index = 0;		
