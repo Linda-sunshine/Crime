@@ -27,14 +27,15 @@ public class JSeedMain {
 		String stopwords = "./data/Model/stopwords.dat";
 		
 		int k = 2000;
-//		String prefix = "/if15/lg5bt/DSIData";//"./data"
-		String prefix = "./data";
+		String prefix = "/if15/lg5bt/DSIData";//"./data"
+//		String prefix = "./data";
 		String data = "geo";
 
 		String fv = "seed";
-		String type = "gay";// "black" or "gay"
-		String suffix = ".csv";
-		String att = "imp";
+		for(String type: new String[]{"black", "gay"}){
+			for(String att: new String[]{"imp", "exp"}){		
+				String suffix = ".csv";
+//		String att = "imp";
 		boolean demo = false;// whether we include the demo in the training.
 		
 		// Specify the feature file with seed words.
@@ -113,4 +114,4 @@ public class JSeedMain {
 			e.printStackTrace();
 		}
 	}
-}
+}}}
