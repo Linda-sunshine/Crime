@@ -1,4 +1,89 @@
 [Info]k:21,data:geo,fv:seed,type:black,demo:false,att:imp
 Start generating black training tweets....
-21 feature words loaded from ./data/geo/black_seed_21.txt...
+20 feature words loaded from ./data/geo/black_seed_21.txt...
 Loading 616 stopwords from ./data/Model/stopwords.dat
+...............---------------------------------------------
+580 secs are used to load the users.
+110/150 users are loaded from ./data/geo/tweetSplit/tweetsTrain/...
+alachua_florida
+anoka_minnesota
+boone_missouri
+boulder_colorado
+champaign_illinois
+clackamas_oregon
+cumberland_maine
+dane_wisconsin
+delaware_indiana
+essex_massachusetts
+fairfield_connecticut
+fayette_kentucky
+gallatin_montana
+hampden_massachusetts
+hartford_connecticut
+hillsborough_new_hampshire
+ingham_michigan
+johnson_iowa
+lancaster_pennsylvania
+larimer_colorado
+lee_alabama
+leon_florida
+macomb_michigan
+marion_indiana
+mchenry_illinois
+mclean_illinois
+new_castle_delaware
+norfolk_massachusetts
+palm_beach_florida
+san_luis_obispo_california
+san_mateo_california
+sangamon_illinois
+sonoma_california
+tolland_connecticut
+tompkins_new_york
+tulsa_oklahoma
+waukesha_wisconsin
+weld_colorado
+whatcom_washington
+whitman_washington
+the number of counties of iat score 110
+Text feature generated for 6007 documents...
+Start generating black testing tweets....
+20 feature words loaded from ./data/geo/black_seed_21.txt...
+.....---------------------------------------------
+147 secs are used to load the users.
+39/50 users are loaded from ./data/geo/tweetSplit/tweetsTest/...
+benton_oregon
+dekalb_illinois
+lacrosse_wisconsin
+lane_oregon
+middlesex_new_jersey
+monongalia_west_virginia
+monroe_indiana
+ottawa_michigan
+plymouth_massachusetts
+tippecanoe_indiana
+ventura_california
+the number of counties of iat score 39
+Text feature generated for 1832 documents...
+Start loading black training data from ./data/geo/ArffData/black_train_imp_seed_21_demo_false.arff....
+Start loading black testing data from ./data/geo/ArffData/black_test_imp_seed_21_demo_false.arff....
+Start evaluation...
+
+Results For imp Attitudes
+======
+
+Correlation coefficient                 -0.1014
+Mean absolute error                      0.0363
+Root mean squared error                  0.0473
+Relative absolute error                117.3429 %
+Root relative squared error            122.2262 %
+Total Number of Instances               39     
+
+Exception in thread "main" java.lang.NoClassDefFoundError: org/apache/commons/math3/stat/inference/TTest
+	at mains.JSeedMain.main(JSeedMain.java:103)
+Caused by: java.lang.ClassNotFoundException: org.apache.commons.math3.stat.inference.TTest
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 1 more
