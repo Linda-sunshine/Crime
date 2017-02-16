@@ -5,3 +5,4 @@ compile
 run
 *.class
 *.jar
+*.output
