@@ -82,7 +82,8 @@ public class JSeedAllMain {
 		Instances train = new Instances(trainReader);
 		train.setClassIndex(train.numAttributes() - 1);
 		lr.buildClassifier(train);
-		System.out.println(String.format("[Info] coefficients: %.5f", lr.coefficients()));
+		
+//		System.out.println(String.format("[Info] coefficients: %.5f", lr.coefficients()));
 		
 //		System.out.println(String.format("Start loading %s testing data from %s....", type, testFile));
 //		BufferedReader testReader = new BufferedReader(new FileReader(testFile));
@@ -90,9 +91,9 @@ public class JSeedAllMain {
 //		test.setClassIndex(test.numAttributes() - 1);
 //
 //		System.out.println("Start evaluation...");
-//		Evaluation eval = new Evaluation(train);
-//		eval.evaluateModel(lr, test);
-//		System.out.println(eval.toSummaryString(String.format("\nResults For %s Attitudes\n======\n", att), false));
+		Evaluation eval = new Evaluation(train);
+		eval.evaluateModel(lr, train);
+		System.out.println(eval.toSummaryString(String.format("\nResults For %s Attitudes\n======\n", att), false));
 
 		// seed words list.
 		double[] weights = lr.coefficients();
