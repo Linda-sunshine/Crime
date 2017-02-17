@@ -3,7 +3,7 @@ Start generating black training tweets....
 20 feature words loaded from ./data/geo/black_seed_21.txt...
 Loading 616 stopwords from ./data/Model/stopwords.dat
 ...............---------------------------------------------
-580 secs are used to load the users.
+601 secs are used to load the users.
 110/150 users are loaded from ./data/geo/tweetSplit/tweetsTrain/...
 alachua_florida
 anoka_minnesota
@@ -50,7 +50,7 @@ Text feature generated for 6007 documents...
 Start generating black testing tweets....
 20 feature words loaded from ./data/geo/black_seed_21.txt...
 .....---------------------------------------------
-147 secs are used to load the users.
+154 secs are used to load the users.
 39/50 users are loaded from ./data/geo/tweetSplit/tweetsTest/...
 benton_oregon
 dekalb_illinois
@@ -79,11 +79,390 @@ Relative absolute error                117.3429 %
 Root relative squared error            122.2262 %
 Total Number of Instances               39     
 
-Exception in thread "main" java.lang.NoClassDefFoundError: org/apache/commons/math3/stat/inference/TTest
-	at mains.JSeedMain.main(JSeedMain.java:103)
-Caused by: java.lang.ClassNotFoundException: org.apache.commons.math3.stat.inference.TTest
-	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
-	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
-	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
-	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
-	... 1 more
+[Info]pValue is 0.17872.
+[Info]k:21,data:geo,fv:seed,type:black,demo:false,att:exp
+Start generating black training tweets....
+20 feature words loaded from ./data/geo/black_seed_21.txt...
+Loading 616 stopwords from ./data/Model/stopwords.dat
+...............---------------------------------------------
+601 secs are used to load the users.
+110/150 users are loaded from ./data/geo/tweetSplit/tweetsTrain/...
+alachua_florida
+anoka_minnesota
+boone_missouri
+boulder_colorado
+champaign_illinois
+clackamas_oregon
+cumberland_maine
+dane_wisconsin
+delaware_indiana
+essex_massachusetts
+fairfield_connecticut
+fayette_kentucky
+gallatin_montana
+hampden_massachusetts
+hartford_connecticut
+hillsborough_new_hampshire
+ingham_michigan
+johnson_iowa
+lancaster_pennsylvania
+larimer_colorado
+lee_alabama
+leon_florida
+macomb_michigan
+marion_indiana
+mchenry_illinois
+mclean_illinois
+new_castle_delaware
+norfolk_massachusetts
+palm_beach_florida
+san_luis_obispo_california
+san_mateo_california
+sangamon_illinois
+sonoma_california
+tolland_connecticut
+tompkins_new_york
+tulsa_oklahoma
+waukesha_wisconsin
+weld_colorado
+whatcom_washington
+whitman_washington
+the number of counties of iat score 110
+Text feature generated for 6007 documents...
+Start generating black testing tweets....
+20 feature words loaded from ./data/geo/black_seed_21.txt...
+.....---------------------------------------------
+154 secs are used to load the users.
+39/50 users are loaded from ./data/geo/tweetSplit/tweetsTest/...
+benton_oregon
+dekalb_illinois
+lacrosse_wisconsin
+lane_oregon
+middlesex_new_jersey
+monongalia_west_virginia
+monroe_indiana
+ottawa_michigan
+plymouth_massachusetts
+tippecanoe_indiana
+ventura_california
+the number of counties of iat score 39
+Text feature generated for 1832 documents...
+Start loading black training data from ./data/geo/ArffData/black_train_exp_seed_21_demo_false.arff....
+Start loading black testing data from ./data/geo/ArffData/black_test_exp_seed_21_demo_false.arff....
+Start evaluation...
+
+Results For exp Attitudes
+======
+
+Correlation coefficient                 -0.1619
+Mean absolute error                      0.1105
+Root mean squared error                  0.1449
+Relative absolute error                112.2374 %
+Root relative squared error            115.2639 %
+Total Number of Instances               39     
+
+[Info]pValue is 0.25806.
+[Info]k:9,data:geo,fv:seed,type:gay,demo:false,att:imp
+Start generating gay training tweets....
+9 feature words loaded from ./data/geo/gay_seed_9.txt...
+Loading 616 stopwords from ./data/Model/stopwords.dat
+...............---------------------------------------------
+604 secs are used to load the users.
+60/150 users are loaded from ./data/geo/tweetSplit/tweetsTrain/...
+ada_idaho
+alachua_florida
+anne_arundel_maryland
+anoka_minnesota
+arapahoe_colorado
+arlington_virginia
+boone_missouri
+boulder_colorado
+brazos_texas
+brown_wisconsin
+burlington_new_jersey
+butler_ohio
+champaign_illinois
+charlottesville_city_virginia
+clackamas_oregon
+clarke_georgia
+cumberland_maine
+cumberland_pennsylvania
+dane_wisconsin
+delaware_indiana
+denton_texas
+douglas_nebraska
+durham_north_carolina
+el_paso_colorado
+essex_massachusetts
+essex_new_jersey
+fairfield_connecticut
+fayette_kentucky
+franklin_ohio
+gallatin_montana
+genesee_michigan
+hamilton_ohio
+hampden_massachusetts
+hartford_connecticut
+hillsborough_new_hampshire
+honolulu_hawaii
+ingham_michigan
+jefferson_colorado
+jefferson_kentucky
+johnson_iowa
+johnson_kansas
+kalamazoo_michigan
+kane_illinois
+kent_michigan
+lancaster_nebraska
+lancaster_pennsylvania
+larimer_colorado
+lee_alabama
+leon_florida
+macomb_michigan
+marion_indiana
+mchenry_illinois
+mclean_illinois
+montgomery_ohio
+nassau_new_york
+new_castle_delaware
+norfolk_massachusetts
+orange_north_carolina
+orleans_parish_louisiana
+palm_beach_florida
+pima_arizona
+pitt_north_carolina
+polk_iowa
+pulaski_arkansas
+ramsey_minnesota
+richland_south_carolina
+salt_lake_utah
+san_luis_obispo_california
+san_mateo_california
+sangamon_illinois
+santa_barbara_california
+santa_clara_california
+shelby_tennessee
+snohomish_washington
+sonoma_california
+spokane_washington
+st_joseph_indiana
+summit_ohio
+thurston_washington
+tolland_connecticut
+tompkins_new_york
+travis_texas
+tulsa_oklahoma
+union_new_jersey
+volusia_florida
+wake_north_carolina
+wayne_michigan
+weld_colorado
+whatcom_washington
+whitman_washington
+the number of counties of iat score 60
+Text feature generated for 334 documents...
+Start generating gay testing tweets....
+9 feature words loaded from ./data/geo/gay_seed_9.txt...
+.....---------------------------------------------
+155 secs are used to load the users.
+19/50 users are loaded from ./data/geo/tweetSplit/tweetsTest/...
+alameda_california
+benton_oregon
+brevard_florida
+centre_pennsylvania
+cuyahoga_ohio
+dakota_minnesota
+dekalb_illinois
+douglas_colorado
+forsyth_north_carolina
+fresno_california
+guilford_north_carolina
+jackson_missouri
+lacrosse_wisconsin
+lane_oregon
+miami_dade_florida
+middlesex_new_jersey
+monongalia_west_virginia
+monroe_indiana
+orange_california
+ottawa_michigan
+plymouth_massachusetts
+providence_rhode_island
+riverside_california
+san_bernardino_california
+san_diego_california
+tarrant_texas
+tippecanoe_indiana
+utah_utah
+ventura_california
+washington_oregon
+washtenaw_michigan
+the number of counties of iat score 19
+Text feature generated for 129 documents...
+Start loading gay training data from ./data/geo/ArffData/gay_train_imp_seed_9_demo_false.arff....
+Start loading gay testing data from ./data/geo/ArffData/gay_test_imp_seed_9_demo_false.arff....
+Start evaluation...
+
+Results For imp Attitudes
+======
+
+Correlation coefficient                  0     
+Mean absolute error                      0.0476
+Root mean squared error                  0.0631
+Relative absolute error                100      %
+Root relative squared error            100      %
+Total Number of Instances               19     
+
+[Info]pValue is 0.33880.
+[Info]k:9,data:geo,fv:seed,type:gay,demo:false,att:exp
+Start generating gay training tweets....
+9 feature words loaded from ./data/geo/gay_seed_9.txt...
+Loading 616 stopwords from ./data/Model/stopwords.dat
+...............---------------------------------------------
+605 secs are used to load the users.
+60/150 users are loaded from ./data/geo/tweetSplit/tweetsTrain/...
+ada_idaho
+alachua_florida
+anne_arundel_maryland
+anoka_minnesota
+arapahoe_colorado
+arlington_virginia
+boone_missouri
+boulder_colorado
+brazos_texas
+brown_wisconsin
+burlington_new_jersey
+butler_ohio
+champaign_illinois
+charlottesville_city_virginia
+clackamas_oregon
+clarke_georgia
+cumberland_maine
+cumberland_pennsylvania
+dane_wisconsin
+delaware_indiana
+denton_texas
+douglas_nebraska
+durham_north_carolina
+el_paso_colorado
+essex_massachusetts
+essex_new_jersey
+fairfield_connecticut
+fayette_kentucky
+franklin_ohio
+gallatin_montana
+genesee_michigan
+hamilton_ohio
+hampden_massachusetts
+hartford_connecticut
+hillsborough_new_hampshire
+honolulu_hawaii
+ingham_michigan
+jefferson_colorado
+jefferson_kentucky
+johnson_iowa
+johnson_kansas
+kalamazoo_michigan
+kane_illinois
+kent_michigan
+lancaster_nebraska
+lancaster_pennsylvania
+larimer_colorado
+lee_alabama
+leon_florida
+macomb_michigan
+marion_indiana
+mchenry_illinois
+mclean_illinois
+montgomery_ohio
+nassau_new_york
+new_castle_delaware
+norfolk_massachusetts
+orange_north_carolina
+orleans_parish_louisiana
+palm_beach_florida
+pima_arizona
+pitt_north_carolina
+polk_iowa
+pulaski_arkansas
+ramsey_minnesota
+richland_south_carolina
+salt_lake_utah
+san_luis_obispo_california
+san_mateo_california
+sangamon_illinois
+santa_barbara_california
+santa_clara_california
+shelby_tennessee
+snohomish_washington
+sonoma_california
+spokane_washington
+st_joseph_indiana
+summit_ohio
+thurston_washington
+tolland_connecticut
+tompkins_new_york
+travis_texas
+tulsa_oklahoma
+union_new_jersey
+volusia_florida
+wake_north_carolina
+wayne_michigan
+weld_colorado
+whatcom_washington
+whitman_washington
+the number of counties of iat score 60
+Text feature generated for 334 documents...
+Start generating gay testing tweets....
+9 feature words loaded from ./data/geo/gay_seed_9.txt...
+.....---------------------------------------------
+172 secs are used to load the users.
+19/50 users are loaded from ./data/geo/tweetSplit/tweetsTest/...
+alameda_california
+benton_oregon
+brevard_florida
+centre_pennsylvania
+cuyahoga_ohio
+dakota_minnesota
+dekalb_illinois
+douglas_colorado
+forsyth_north_carolina
+fresno_california
+guilford_north_carolina
+jackson_missouri
+lacrosse_wisconsin
+lane_oregon
+miami_dade_florida
+middlesex_new_jersey
+monongalia_west_virginia
+monroe_indiana
+orange_california
+ottawa_michigan
+plymouth_massachusetts
+providence_rhode_island
+riverside_california
+san_bernardino_california
+san_diego_california
+tarrant_texas
+tippecanoe_indiana
+utah_utah
+ventura_california
+washington_oregon
+washtenaw_michigan
+the number of counties of iat score 19
+Text feature generated for 129 documents...
+Start loading gay training data from ./data/geo/ArffData/gay_train_exp_seed_9_demo_false.arff....
+Start loading gay testing data from ./data/geo/ArffData/gay_test_exp_seed_9_demo_false.arff....
+Start evaluation...
+
+Results For exp Attitudes
+======
+
+Correlation coefficient                 -0.3612
+Mean absolute error                      0.1404
+Root mean squared error                  0.1734
+Relative absolute error                111.144  %
+Root relative squared error            109.8489 %
+Total Number of Instances               19     
+
+[Info]pValue is 0.34887.

@@ -27,7 +27,7 @@ public class JWeightMain {
 		String prefix = "./data";
 		String data = "geo";
 
-		String fv = "df";
+		String fv = "toplr";
 		for(String type: new String[]{"black", "gay"}){
 			for(String att: new String[]{"imp", "exp"}){
 		
