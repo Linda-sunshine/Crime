@@ -51,17 +51,10 @@ public class MPredictMain {
 	}
 	//In the main function, we want to input the data and do adaptation 
 	public static void main(String[] args) throws InvalidFormatException, FileNotFoundException, IOException{
-		
-		int classNumber = 2;
-		int Ngram = 2; // The default value is unigram.
-		int lengthThreshold = 0; // Document length threshold
-
-		String tokenModel = "./data/Model/en-token.bin"; // Token model.
-		String stopwords = "./data/Model/stopwords.dat";
-		
+	
 		int k = 2000;
-		String prefix = "/if15/lg5bt/DSIData";//"./data"
-//		String prefix = "./data";
+//		String prefix = "/if15/lg5bt/DSIData";//"./data"
+		String prefix = "./data";
 		String data = "geo";
 		
 		for(String fv: new String[]{"df", "toplr"}){

@@ -15,7 +15,6 @@ import weka.core.Instances;
 import org.apache.commons.math3.*;
 import org.apache.commons.math3.stat.inference.TTest;
 
-
 public class JWeightMain {
 	public static void main(String[] args) throws Exception{
 
@@ -27,14 +26,21 @@ public class JWeightMain {
 		String prefix = "./data";
 		String data = "geo";
 
-		String fv = "toplr";
-		for(String type: new String[]{"black", "gay"}){
-			for(String att: new String[]{"imp", "exp"}){
+		String fv = "seed";
+		for(String type: new String[]{"gay"}){
+			for(String att: new String[]{"imp"}){
 		
 //		String type = "gay";// "black" or "gay"
 		String suffix = ".csv";
 //		String att = "imp";
 		boolean demo = false;// whether we include the demo in the training.
+		
+		if(fv.equals("seed")){
+			if(type.equals("black"))
+				k = 21;
+			else 
+				k = 9;
+		}
 		
 		String trainFile = String.format("%s/%s/ArffData/%s_train_%s_%s_%d_demo_%b.arff", prefix, data, type, att, fv, k, demo);	
 		String testFile = String.format("%s/%s/ArffData/%s_test_%s_%s_%d_demo_%b.arff", prefix, data, type, att, fv, k, demo);
@@ -67,18 +73,19 @@ public class JWeightMain {
 		train.setClassIndex(train.numAttributes() - 1);
 		lr.buildClassifier(train);
 
-		System.out.println(String.format("Start loading %s testing data from %s....", type, testFile));
-		BufferedReader testReader = new BufferedReader(new FileReader(testFile));
-		Instances test = new Instances(testReader);
-		test.setClassIndex(test.numAttributes() - 1);
+//		System.out.println(String.format("Start loading %s testing data from %s....", type, testFile));
+//		BufferedReader testReader = new BufferedReader(new FileReader(testFile));
+//		Instances test = new Instances(testReader);
+//		test.setClassIndex(test.numAttributes() - 1);
 
 		System.out.println("Start evaluation...");
 		Evaluation eval = new Evaluation(train);
-		eval.evaluateModel(lr, test);
+		eval.evaluateModel(lr, train);
 		System.out.println(eval.toSummaryString(String.format("\nResults For %s Attitudes\n======\n", att), false));
 
 		// seed words list.
 		double[] weights = lr.coefficients();
+		
 		MyPriorityQueue<_RankItem> rankq = new MyPriorityQueue<_RankItem>(k);
 		for(int i=0; i<weights.length-1; i++){
 			if(weights[i] != 0)
