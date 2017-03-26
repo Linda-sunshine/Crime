@@ -38,12 +38,12 @@ public class MyLRTopKMain {
 			String tokenModel = "./data/Model/en-token.bin"; // Token model.
 			String stopwords = "./data/Model/stopwords.dat";
 			
-			int k = 2000;
-			String prefix = "/if15/lg5bt/DSIData";//"./data"
-//			String prefix = "./data";
+			int k = 21;
+//			String prefix = "/if15/lg5bt/DSIData";//"./data"
+			String prefix = "./data";
 			
 			String data = "geo";
-			String fv = "toplr";
+			String fv = "seed";
 			String type = "black";// "black" or "gay"
 			String suffix = ".csv";
 			boolean demo = false;// whether we include the demo in the training.
@@ -68,31 +68,24 @@ public class MyLRTopKMain {
 			train_analyzer.setFeatureValues("TFIDF", 2);
 			train_analyzer.generateArffData(trainFile, att, demo);
 			
-			/***Generate testing Arff files based on the selected features.***/
-			System.out.println(String.format("Start generating %s testing tweets....", type));
-			UserAnalyzer test_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
-			test_analyzer.loadUserDir(tweetTest, suffix);
-			test_analyzer.loadIAT(testIAT);
-			test_analyzer.setFeatureValues("TFIDF", 2);
-			test_analyzer.generateArffData(testFile, att, demo);
+//			/***Generate testing Arff files based on the selected features.***/
+//			System.out.println(String.format("Start generating %s testing tweets....", type));
+//			UserAnalyzer test_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
+//			test_analyzer.loadUserDir(tweetTest, suffix);
+//			test_analyzer.loadIAT(testIAT);
+//			test_analyzer.setFeatureValues("TFIDF", 2);
+//			test_analyzer.generateArffData(testFile, att, demo);
+//			
 			
-			LinearRegression lr = new LinearRegression();
-			
-			System.out.println(String.format("Start loading %s training data from %s....", type, trainFile));
-			BufferedReader trainReader = new BufferedReader(new FileReader(trainFile));
-			Instances train = new Instances(trainReader);
-			train.setClassIndex(train.numAttributes() - 1);
-			lr.buildClassifier(train);
-
-			System.out.println(String.format("Start loading %s testing data from %s....", type, testFile));
-			BufferedReader testReader = new BufferedReader(new FileReader(testFile));
-			Instances test = new Instances(testReader);
-			test.setClassIndex(test.numAttributes() - 1);
-
-			System.out.println("Start evaluation...");
-			Evaluation eval = new Evaluation(train);
-			eval.evaluateModel(lr, test);
-			System.out.println(eval.toSummaryString(String.format("\nResults For %s Attitudes\n======\n", att), false));
+//			System.out.println(String.format("Start loading %s testing data from %s....", type, testFile));
+//			BufferedReader testReader = new BufferedReader(new FileReader(testFile));
+//			Instances test = new Instances(testReader);
+//			test.setClassIndex(test.numAttributes() - 1);
+//
+//			System.out.println("Start evaluation...");
+//			Evaluation eval = new Evaluation(train);
+//			eval.evaluateModel(lr, test);
+//			System.out.println(eval.toSummaryString(String.format("\nResults For %s Attitudes\n======\n", att), false));
 
 		} catch(Exception e1){
 			e1.printStackTrace();

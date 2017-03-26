@@ -2,7 +2,7 @@ package structures;
 
 public class LRParameter {
 	public String m_data = "geo";
-	public String m_prefix = "/if15/lg5bt/DSIData";//"./data"
+	public String m_prefix = "./data";
 	public String m_type = "black";
 	public String m_fv = "toplr";//"df"
 	public int m_k = 2000;
