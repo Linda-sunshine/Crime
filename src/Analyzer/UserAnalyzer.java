@@ -112,7 +112,6 @@ public class UserAnalyzer extends DocAnalyzer {
 		File dir = new File(folder);
 		for(File f: dir.listFiles()){
 			if(f.isFile() && f.getAbsolutePath().endsWith(suffix)){
-//				System.out.println(f.getName());
 				loadUser(f.getAbsolutePath());
 				fCount++;
 				if(fCount%10 == 0)
@@ -165,13 +164,7 @@ public class UserAnalyzer extends DocAnalyzer {
 					
 				}
 			}
-//			if(tweets.size() > 0){
-//				System.out.print(String.format("---%s county has %d tweets containing seed words.---\n", countyID, tweets.size()));
-//				for(_Review t: tweets)
-//					System.out.println(t.getSource());
-//			}
-			if(tweets.size() >= 1){//at least one for adaptation and one for testing
-//				System.out.println("====The county contains seed words.====");
+			if(tweets.size() >= 1){
 				if(!m_countyNameTweetsMap.containsKey(countyID)){
 					_User cur = new _User(countyID, m_classNo, tweets);
 					m_countyNameTweetsMap.put(countyID, cur);
@@ -179,11 +172,7 @@ public class UserAnalyzer extends DocAnalyzer {
 				} else{
 					System.out.println("The county exists in the map!");
 				}
-			} else if(tweets.size() == 1){// added by Lin, for those users with fewer than 2 reviews, ignore them.
-				tweet = tweets.get(0);
-				rollBack(Utils.revertSpVct(tweet.getSparse()), tweet.getYLabel());
-			}
-//			System.out.println("county tweet size " + m_countyNameTweetsMap.size());
+			} 
 			reader.close();
 		} catch(IOException e){
 			e.printStackTrace();
@@ -197,8 +186,6 @@ public class UserAnalyzer extends DocAnalyzer {
 			String line, countyID;			
 			String[] strs;
 
-			// Skip the first line since it is user name.
-//			reader.readLine(); 
 			int count = 0;
 			while((line = reader.readLine()) != null){
 				strs = line.replaceAll("\\s", "").split(",");

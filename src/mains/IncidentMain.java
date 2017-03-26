@@ -1,14 +1,14 @@
 package mains;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
+
+import Analyzer.UserAnalyzer;
+import Classifier.supervised.IncidentPrediction;
+import Classifier.supervised.LinearRegression;
 
 import utils.Utils;
-import weka.classifiers.functions.LinearRegression;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -17,63 +17,71 @@ import weka.core.Instances;
  * Input: features, learned models, test tweet data
  * Process: text processing of the tweets
  * Output: four predicted attitudes data.
- * 
  * @author lin
- *
  */
 
 public class IncidentMain {
-	public static double classify(double[] weights, Instance ins){
-		double pred = weights[0]; // bias term
-		for(int i=0; i<ins.numAttributes(); i++){
-			if(ins.value(i) != 0)
-				pred += weights[i]*ins.value(i);
-		}
-		return pred;
-	}
+
 	public static void main(String[] args) throws Exception{
 
 		int k = 2000;
 		boolean demo = false;
-		String type = "black", att = "imp", fv = "df";
-		String model = String.format("./data/incident/%s_train_%s_%s_%d_demo_%b.txt", type, att, fv, k, demo);
-	
-//		String prefix = "/if15/lg5bt/DSIData";//"./data/"
+		String fv = "df";
+		String blackImpModel = String.format("./data/models/black_model_imp_%s_%d_demo_%b.txt", fv, k, demo);
+		String blackExpModel = String.format("./data/models/black_model_exp_%s_%d_demo_%b.txt", fv, k, demo);
+		String gayImpModel = String.format("./data/models/gay_model_imp_%s_%d_demo_%b.txt", fv, k, demo);
+		String gayExpModel = String.format("./data/models/gay_model_exp_%s_%d_demo_%b.txt", fv, k, demo);
+
 		String prefix = "./data/";
 		String data = "geo";
+		
+		/***Parameters related with analyzing the tweets.***/
+		int classNumber = 2;
+		int Ngram = 2; // The default value is unigram.
+		int lengthThreshold = 0; // Document length threshold
 
-		String trainFile = String.format("%s/%s/ArffData/%s_test_%s_%s_%d_demo_%b.arff", prefix, data, type, att, fv, k, demo);	
-		String testFile = String.format("%s/%s/ArffData/%s_test_%s_%s_%d_demo_%b.arff", prefix, data, type, att, fv, k, demo);
+		String tokenModel = "./data/Model/en-token.bin"; // Token model.
+		String stopwords = "./data/Model/stopwords.dat";
+		
+		String blackFeatures = String.format("%s/%s/black_%s_%d.txt", prefix, data, fv, k);
+		String gayFeatures =  String.format("%s/%s/gay_%s_%d.txt", prefix, data, fv, k);
+		
+		String suffix = ".csv";
+		String tweetTest = String.format("%s/%s/tweetSplit/tweetsTest/", prefix, data);
+		String blackIAT = String.format("%s/%s/blackTestIAT.csv", prefix, data);
+		String gayIAT = String.format("%s/%s/gayTestIAT.csv", prefix, data);
+		
+		String blackImpTestArff = String.format("%s/%s/ArffData/black_test_imp_%s_%d_demo_%b.arff", prefix, data, fv, k, demo);
+		String blackExpTestArff = String.format("%s/%s/ArffData/black_test_exp_%s_%d_demo_%b.arff", prefix, data, fv, k, demo);
+		String gayImpTestArff = String.format("%s/%s/ArffData/gay_test_imp_%s_%d_demo_%b.arff", prefix, data, fv, k, demo);
+		String gayExpTestArff = String.format("%s/%s/ArffData/gay_test_exp_%s_%d_demo_%b.arff", prefix, data, fv, k, demo);
+
+		/***Generate testing Arff files based on the selected features.***/
+		System.out.println(String.format("Start generating %s testing tweets....", type));
+		UserAnalyzer blackImp = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
+		
+		
+		
+		test_analyzer.loadUserDir(tweetTest, suffix);
+		test_analyzer.loadIAT(testIAT);
+		test_analyzer.setFeatureValues("TFIDF", 2);
+		test_analyzer.generateArffData(testImpFile, "imp", demo);
+		test_analyzer.generateArffData(testExpFile, "exp", demo);
 		
 		try{
-			/***Implicit attitudes.****/
-			LinearRegression lr = new LinearRegression();
-			
-			BufferedReader trainReader = new BufferedReader(new FileReader(trainFile));
-			Instances train = new Instances(trainReader);
-			train.setClassIndex(train.numAttributes() - 1);
-			System.out.print("Total number of attributes is "+train.numAttributes());
-			lr.buildClassifier(train);
-			System.out.println(String.format("Start loading %s testing data from %s....", type, testFile));
-			
-			BufferedReader testReader = new BufferedReader(new FileReader(testFile));
-			Instances test = new Instances(testReader);
-			test.setClassIndex(test.numAttributes() - 1);
-			double[] coefficients = lr.coefficients();
-			
+			BufferedReader testImpReader = new BufferedReader(new FileReader(testFile));
+			Instances impTest = new Instances(testImpReader);
+			impTest.setClassIndex(impTest.numAttributes() - 1);
+			IncidentPrediction inc = new IncidentPrediction();
+			// load the weights.
+			inc.loadWeights(modelFile);
 			Instance ins;
-			double trueY = 0, predY = 0, dotY = 0 ; 
+			double trueY = 0, predY = 0; 
 			for(int i=0; i<test.size(); i++){
 				ins = test.get(i);
 				trueY = ins.value(test.numAttributes()-1);
-				int size = ins.numAttributes();
-				System.out.println("Ins attribute number: " + size);
-				for(int s=0; s<size; s++){
-					System.out.println(s + ins.attribute(s).name() + "\t" + ins.value(s));
-				}
-				predY = lr.classifyInstance(ins);
-				dotY = classify(coefficients, ins);
-				System.out.print(String.format("TrueY:%.4f, predY by lr:%.4f, predY by self:%.4f\n", trueY, predY, dotY));
+				predY = inc.classify(ins);
+				System.out.print(String.format("TrueY:%.4f, predY by lr:%.4f", trueY, predY));
 			}
 		}catch(IOException e){
 			e.printStackTrace();
