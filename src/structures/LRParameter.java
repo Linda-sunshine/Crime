@@ -9,6 +9,8 @@ public class LRParameter {
 	public String m_att = "imp";//"exp"
 	public boolean m_demo = false;
 	public String m_suffix = ".csv";
+	public String m_test = "./data/geo/tweetSplit/tweetsTest/";
+
 //	public int m_userSet = 10; // The set of users we want to use.
 //	public int m_ttlSizeSet = 24; // The total number of sizes.
 //	public int m_ttlUserSetNo = 10; // The total number of user sets.
@@ -40,7 +42,8 @@ public class LRParameter {
 				m_k = Integer.valueOf(argv[i]);
 			else if (argv[i-1].equals("-demo"))
 				m_demo = Boolean.valueOf(argv[i]);
-			
+			else if (argv[i-1].equals("-test"))
+				m_test = argv[i];
 			else
 				exit_with_help();
 		}
