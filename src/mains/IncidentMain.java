@@ -26,7 +26,7 @@ public class IncidentMain {
 
 		int k = 2000;
 		boolean demo = false;
-		String fv = "df";
+		String fv = "toplr";
 		String blackImpModel = String.format("./data/models/black_model_imp_%s_%d_demo_%b.txt", fv, k, demo);
 		String blackExpModel = String.format("./data/models/black_model_exp_%s_%d_demo_%b.txt", fv, k, demo);
 		String gayImpModel = String.format("./data/models/gay_model_imp_%s_%d_demo_%b.txt", fv, k, demo);

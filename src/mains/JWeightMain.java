@@ -16,6 +16,32 @@ import org.apache.commons.math3.*;
 import org.apache.commons.math3.stat.inference.TTest;
 
 public class JWeightMain {
+	
+	
+	public static double classify(double[] weights, Instance ins){
+		if(weights.length == 0 || weights == null){
+			System.err.println("Load model weights first!");
+			return -1;
+		}
+		double pred = 0;
+		if(weights.length == ins.numAttributes()+1)
+			System.out.println("Confused format!!");
+		
+		// dot product
+		for(int i=0; i<=ins.numAttributes(); i++){
+			// bias term
+			if(i == ins.numAttributes()-1) continue;
+			if(i == ins.numAttributes()){
+				pred += weights[i];
+				return pred;
+			} else{
+				if(ins.value(i) != 0){
+					pred += weights[i]*ins.value(i);
+				}
+			}
+		}
+		return pred;
+	}
 	public static void main(String[] args) throws Exception{
 
 		String tokenModel = "./data/Model/en-token.bin"; // Token model.
@@ -26,7 +52,7 @@ public class JWeightMain {
 		String prefix = "./data";
 		String data = "geo";
 
-		String fv = "seed";
+		String fv = "toplr";
 		for(String type: new String[]{"gay"}){
 			for(String att: new String[]{"imp"}){
 		
@@ -72,38 +98,47 @@ public class JWeightMain {
 		Instances train = new Instances(trainReader);
 		train.setClassIndex(train.numAttributes() - 1);
 		lr.buildClassifier(train);
+		double[] weights = lr.coefficients();
+		System.out.println("Dim: " + weights.length);
+		for(Instance ins: train){
+			double predY = lr.classifyInstance(ins);
+			double trueY = ins.value(train.numAttributes()-1);
+			double pred = classify(weights, ins);
+			System.out.println(String.format("predY:%.4f,trueY:%4f,pred:%.4f\n", predY, trueY, pred));
+		}
+		
 
 //		System.out.println(String.format("Start loading %s testing data from %s....", type, testFile));
 //		BufferedReader testReader = new BufferedReader(new FileReader(testFile));
 //		Instances test = new Instances(testReader);
 //		test.setClassIndex(test.numAttributes() - 1);
 
-		System.out.println("Start evaluation...");
-		Evaluation eval = new Evaluation(train);
-		eval.evaluateModel(lr, train);
-		System.out.println(eval.toSummaryString(String.format("\nResults For %s Attitudes\n======\n", att), false));
+//		System.out.println("Start evaluation...");
+//		Evaluation eval = new Evaluation(train);
+//		eval.evaluateModel(lr, train);
+//		System.out.println(eval.toSummaryString(String.format("\nResults For %s Attitudes\n======\n", att), false));
 
-		// seed words list.
-		double[] weights = lr.coefficients();
-		
-		MyPriorityQueue<_RankItem> rankq = new MyPriorityQueue<_RankItem>(k);
-		for(int i=0; i<weights.length-1; i++){
-			if(weights[i] != 0)
-				rankq.add(new _RankItem(i, weights[i]));
-		}
-		double[] zeros = new double[weights.length];
-		TTest t = new TTest();
-		double pVal = t.pairedTTest(weights, zeros);
-		System.out.println(String.format("[Info]pValue is %.5f.", pVal));
-		
-		try{
-			PrintWriter writer = new PrintWriter(new File(sortFile));
-			for(_RankItem it: rankq){
-				writer.write(String.format("%s, %.4f\n", train.attribute(it.m_index).name(), it.m_value));
-			}
-			writer.close();
-		} catch(IOException e){
-			e.printStackTrace();
-		}
+//		// seed words list.
+//		double[] weights = lr.coefficients();
+//		
+//		MyPriorityQueue<_RankItem> rankq = new MyPriorityQueue<_RankItem>(k);
+//		for(int i=0; i<weights.length-1; i++){
+//			if(weights[i] != 0)
+//				rankq.add(new _RankItem(i, weights[i]));
+//		}
+//		double[] zeros = new double[weights.length];
+//		TTest t = new TTest();
+//		double pVal = t.pairedTTest(weights, zeros);
+//		System.out.println(String.format("[Info]pValue is %.5f.", pVal));
+//		
+//		try{
+//			PrintWriter writer = new PrintWriter(new File(sortFile));
+//			for(_RankItem it: rankq){
+//				writer.write(String.format("%s, %.4f\n", train.attribute(it.m_index).name(), it.m_value));
+//			}
+//			writer.close();
+//		} catch(IOException e){
+//			e.printStackTrace();
+//		}
 	}
 }}}

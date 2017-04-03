@@ -32,6 +32,7 @@ public class IncidentPrediction {
 		}
 	}
 	
+	// The prediction function with given model weights. 
 	public double classify(Instance ins){
 		if(m_weights.length == 0 || m_weights == null){
 			System.err.println("Load model weights first!");

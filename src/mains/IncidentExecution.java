@@ -62,12 +62,12 @@ public class IncidentExecution {
 		// generate gay implicit test data
 		gayImpAnalyzer.loadUserDir(tweetTest, suffix);
 		gayImpAnalyzer.setFeatureValues("TFIDF", 2);
-		gayImpAnalyzer.generateArffData(blackImpTestArff, "imp", param.m_demo);
+		gayImpAnalyzer.generateArffData(gayImpTestArff, "imp", param.m_demo);
 		
 		// generate gay explicit test data
 		gayExpAnalyzer.loadUserDir(tweetTest, suffix);
 		gayExpAnalyzer.setFeatureValues("TFIDF", 2);
-		gayExpAnalyzer.generateArffData(blackExpTestArff, "exp", param.m_demo);
+		gayExpAnalyzer.generateArffData(gayExpTestArff, "exp", param.m_demo);
 	
 		/***Load learned model weights from files.***/
 		// load the weights for black implicit attitude.
@@ -115,13 +115,14 @@ public class IncidentExecution {
 				gayImpPy = gayImpPred.classify(gayImpIns);
 				gayExpPy = gayExpPred.classify(gayExpIns);
 				
-				System.out.print(String.format("BlackImp:(%.4f,%.4f)\tBlackExp(%.4f,%.4f)\tGayImp(%.4f,%.4f)\tGayExp(%.4f,%.4f)\n", 
-						blackImpIns.value(blackImpIns.numAttributes()-1), blackImpPy,
-						blackExpIns.value(blackExpIns.numAttributes()-1), blackExpPy,
-						gayImpIns.value(gayImpIns.numAttributes()-1), gayImpPy,
-						gayExpIns.value(gayExpIns.numAttributes()-1), gayExpPy));
+				System.out.print(String.format("BlackImp(%.4f,%.4f)\tBlackExp(%.4f,%.4f)\tGayImp(%.4f,%.4f)\tGayExp(%.4f,%.4f)\n", 
+						blackImpIns.value(blackImpTest.numAttributes()-1), blackImpPy,
+						blackExpIns.value(blackExpTest.numAttributes()-1), blackExpPy,
+						gayImpIns.value(gayImpTest.numAttributes()-1), gayImpPy,
+						gayExpIns.value(gayExpTest.numAttributes()-1), gayExpPy));
 			}
-		}
+		} else
+			System.out.print(String.format("[Info] Different incident size! blackImp: %d, blackExp: %d, gayImp: %d, gayExp: %d\n", blackImpTest.size(), blackExpTest.size(), gayImpTest.size(), gayExpTest.size()));
 	}
 }
 
