@@ -41,15 +41,15 @@ public class MySplitMain {
 		UserAnalyzer splitAnalyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
 	
 		// split the tweets data and iat data.
-		splitAnalyzer.loadIATCounties(blackIAT, trainSize);
-		splitAnalyzer.saveTrainTestTweets(tweetDir, suffix, tweetTrain, tweetTest);
+//		splitAnalyzer.loadIATCounties(blackIAT, trainSize);
+//		splitAnalyzer.saveTrainTestTweets(tweetDir, suffix, tweetTrain, tweetTest);
 		
 		String blackTrainIAT = String.format("./data/%s/blackTrainIAT.csv",data);
 		String blackTestIAT = String.format("./data/%s/blackTestIAT.csv", data);
 		String gayTrainIAT = String.format("./data/%s/gayTrainIAT.csv", data);
 		String gayTestIAT = String.format("./data/%s/gayTestIAT.csv", data);
-		splitAnalyzer.saveTrainTestIAT(blackIAT, blackTrainIAT, blackTestIAT);
-		splitAnalyzer.saveTrainTestIAT(gayIAT, gayTrainIAT, gayTestIAT);
+//		splitAnalyzer.saveTrainTestIAT(blackIAT, blackTrainIAT, blackTestIAT);
+//		splitAnalyzer.saveTrainTestIAT(gayIAT, gayTrainIAT, gayTestIAT);
 
 	}
 }

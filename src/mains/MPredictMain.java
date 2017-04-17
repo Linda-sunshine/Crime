@@ -24,6 +24,7 @@ import weka.classifiers.functions.LinearRegression;
 import weka.core.Instance;
 import weka.core.Instances;
 import Analyzer.UserAnalyzer;
+import Classifier.supervised.IncidentPrediction;
 
 public class MPredictMain {
 
@@ -57,27 +58,34 @@ public class MPredictMain {
 		String prefix = "./data";
 		String data = "geo";
 		
-		for(String fv: new String[]{"df", "toplr"}){
-			for(boolean demo: new boolean[]{false, true}){
-//		for(int k: new int[]{2000, 3000, 4000}){
-			for(String att: new String[]{"imp", "exp"}){
-//		String fv = "df";
-		String type = "gay";// "black" or "gay"
+		
+		/***Parameters related with analyzing the tweets.***/
+		int classNumber = 2;
+		int Ngram = 2; // The default value is unigram.
+		int lengthThreshold = 0; // Document length threshold
+		String tokenModel = "./data/Model/en-token.bin"; // Token model.
+		
+		
+//		for(String fv: new String[]{"toplr"}){
+//			for(boolean demo: new boolean[]{false, true}){
+//			for(String att: new String[]{"imp", "exp"}){
+		String fv = "toplr";
+		String type = "black";// "black" or "gay"
 		String suffix = ".csv";
-//		String att = "imp";
-//		boolean demo = false;// whether we include the demo in the training.
+		String att = "imp";
+		boolean demo = false;// whether we include the demo in the training.
 		
 //		String tweetTrain = String.format("%s/%s/tweetSplit/tweetsTrain/", prefix, data);
 		String tweetTest = String.format("%s/%s/tweetSplit/tweetsTest/", prefix, data);
-		String features = String.format("%s/%s/%s_%s_%d.txt", prefix, data, type, fv, k);
+		String features = String.format("%s/%s/%s_%s_%d_%s.txt", prefix, data, type, fv, k, att);
 
-		String trainIAT = String.format("%s/%s/%sTrainIAT.csv", prefix, data, type);
+//		String trainIAT = String.format("%s/%s/%sTrainIAT.csv", prefix, data, type);
 		String testIAT = String.format("%s/%s/%sTestIAT.csv", prefix, data, type);
 			
 		String trainFile = String.format("%s/%s/ArffData/%s_train_%s_%s_%d_demo_%b.arff", prefix, data, type, att, fv, k, demo);	
 		String testFile = String.format("%s/%s/ArffData/%s_test_%s_%s_%d_demo_%b.arff", prefix, data, type, att, fv, k, demo);
 		String resFile = String.format("%s/%s/Results/%s_res_%s_%s_%d_demo_%b.txt", prefix, data, type, att, fv, k, demo);
-
+		String modelFile = String.format("%s/models/%s_model_%s_%s_%d_demo_%b.txt", prefix, type, att, fv, k, demo);
 		/***Train linear regression models.***/
 		try{
 			/***Implicit attitudes.****/
@@ -88,32 +96,46 @@ public class MPredictMain {
 			train.setClassIndex(train.numAttributes() - 1);
 			System.out.print("Total number of attributes is "+train.numAttributes());
 			lr.buildClassifier(train);
-//
+
 //			UserAnalyzer test_analyzer = new UserAnalyzer(tokenModel, classNumber, features, Ngram, lengthThreshold, false);
 //			test_analyzer.loadUserDir(tweetTest, suffix);
 //			test_analyzer.loadIAT(testIAT);
 //			test_analyzer.setFeatureValues("TFIDF", 2);
-//			test_analyzer.generateArffData(testImpFile, "imp", demo);
-//			
+//			test_analyzer.generateArffData(testFile, "imp", demo);
+			
+//			String blackImpFeatures = String.format("%s/%s/black_%s_%d_imp.txt", prefix, data, fv, k);
+//			String blackImpTestArff = String.format("%s/%s/ArffData/black_test_imp_%s_%d_demo_%b.arff", prefix, data, fv, k, demo);
+
+//			String tweetTest = String.format("%s/%s/tweetSplit/tweetsDebug/", prefix, data);
+//			UserAnalyzer blackImpAnalyzer = new UserAnalyzer(tokenModel, classNumber, blackImpFeatures, Ngram, lengthThreshold, false);
+
+			// generate black implicit test data
+//			blackImpAnalyzer.loadUserDir(tweetTest, suffix);
+//			blackImpAnalyzer.setFeatureValues("TFIDF", 2);
+//			blackImpAnalyzer.generateArffData(blackImpTestArff, "imp", demo);
+			
 			System.out.println(String.format("Start loading %s testing data from %s....", type, testFile));
 			BufferedReader testReader = new BufferedReader(new FileReader(testFile));
 			Instances test = new Instances(testReader);
 			test.setClassIndex(test.numAttributes() - 1);
 			
-			PrintWriter writer = new PrintWriter(new File(resFile));
+			IncidentPrediction pred = new IncidentPrediction();
+			pred.loadWeights(modelFile);
+//			pred.setWeights(lr.coefficients());
+			
 			String[] counties = loadCountyNames("countyIndex.txt");
 //			UserAnalyzer analyzer = new UserAnalyzer(tokenModel, classNumber, null, Ngram, lengthThreshold, false);
 //			analyzer.buildIATMap(testIAT, att);
 //			HashMap<Double, String> iatMap = analyzer.getIATMap();
 			Instance ins;
-			double trueY = 0, predY = 0; 
+			double trueY = 0, predY_0 = 0, predY_1; 
 			for(int i=0; i<test.size(); i++){
 				ins = test.get(i);
 				trueY = ins.value(test.numAttributes()-1);
-				predY = lr.classifyInstance(ins);
-				writer.write(String.format("%s,%.4f,%.4f\n",counties[i], trueY, predY));
+				predY_0 = lr.classifyInstance(ins);
+				predY_1 = pred.classify(ins);
+				System.out.print(String.format("%s,true y: %.4f,pred by lr: %.4f, pred by self:%.4f\n",counties[i], trueY, predY_0, predY_1));
 			}
-			writer.close();
 		
 //			System.out.println("Start evaluation...");
 //			Evaluation eval = new Evaluation(train);
@@ -186,9 +208,8 @@ public class MPredictMain {
 //				e.printStackTrace();
 //			}
 		} catch (Exception e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-	}}}
+//	}}}
 	}
 }

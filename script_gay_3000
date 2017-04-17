@@ -1,0 +1,6 @@
+#!/bin/sh
+for att in imp exp 
+	do for t in 30 50 70 90 200 
+		do ./run -prefix "./data" -type gay -fv df -k 3000 -att $att -demo $demo -nuTopic $t
+	done
+done

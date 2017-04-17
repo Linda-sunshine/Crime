@@ -44,7 +44,9 @@ public class UserAnalyzer extends DocAnalyzer {
 	int m_trainSize = 0, m_adaptSize = 0, m_testSize = 0;
 	double m_pCount[] = new double[3]; // to count the positive ratio in train/adapt/test
 	boolean m_enforceAdapt = false;
-	
+	// key: countyID, value: user
+	HashMap<String, _User> m_countyIDUserMap = new HashMap<String, _User>();
+
 	public UserAnalyzer(String tokenModel, int classNo, String providedCV, int Ngram, int threshold, boolean b) 
 			throws InvalidFormatException, FileNotFoundException, IOException{
 		super(tokenModel, classNo, providedCV, Ngram, threshold, b);
@@ -136,7 +138,6 @@ public class UserAnalyzer extends DocAnalyzer {
 			return text.substring(0, index);
 	}
 	
-	HashMap<String, _User> m_countyNameTweetsMap = new HashMap<String, _User>();
 	// Load one file as a user here. 
 	public void loadUser(String filename){
 		try {
@@ -165,12 +166,12 @@ public class UserAnalyzer extends DocAnalyzer {
 				}
 			}
 			if(tweets.size() >= 1){
-				if(!m_countyNameTweetsMap.containsKey(countyID)){
+				if(!m_countyIDUserMap.containsKey(countyID)){
 					_User cur = new _User(countyID, m_classNo, tweets);
-					m_countyNameTweetsMap.put(countyID, cur);
+					m_countyIDUserMap.put(countyID, cur);
 					m_users.add(cur); //create new user from the file.
 				} else{
-					System.out.println("The county exists in the map!");
+					System.err.println("The county exists in the map!");
 				}
 			} 
 			reader.close();
@@ -179,6 +180,7 @@ public class UserAnalyzer extends DocAnalyzer {
 		}
 	}
 	
+	// load iat scores for the loaded counties/users.
 	public void loadIAT(String filename){
 		try {
 			File file = new File(filename);
@@ -186,13 +188,15 @@ public class UserAnalyzer extends DocAnalyzer {
 			String line, countyID;			
 			String[] strs;
 
+			// skip the first line
+			line = reader.readLine();
 			int count = 0;
 			while((line = reader.readLine()) != null){
 				strs = line.replaceAll("\\s", "").split(",");
 				countyID = findID(strs);
-				if(m_countyNameTweetsMap.containsKey(countyID)){
+				if(m_countyIDUserMap.containsKey(countyID)){
 					count++;
-					_User user = m_countyNameTweetsMap.get(countyID);
+					_User user = m_countyIDUserMap.get(countyID);
 					user.setImpScore(Double.valueOf(strs[3]));
 					user.setExpScore(Double.valueOf(strs[5]));
 					user.setDemographics(strs);
@@ -207,107 +211,131 @@ public class UserAnalyzer extends DocAnalyzer {
 		}
 	}
 	
-	HashMap<Double, String> m_iatCountyMap = new HashMap<Double, String>();
-	DecimalFormat m_df = new DecimalFormat("#.0000");
-	public void buildIATMap(String filename, String att){
+	// Test counties' names
+	ArrayList<String> m_trainCounties = new ArrayList<String>();
+	ArrayList<String> m_testCounties = new ArrayList<String>();
+	// Load the test counties' names
+	public void loadTestCounties(String filename){
 		try {
 			File file = new File(filename);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
 			String line, countyID;			
-			String[] strs;
-
-			// Skip the first line since it is user name.
+			while((line = reader.readLine()) != null){
+				countyID = extractUserID(line);
+				m_testCounties.add(countyID);
+			}
+			reader.close();
+			for(String cname: m_countyIDUserMap.keySet()){
+				if(!m_testCounties.contains(cname))
+					m_trainCounties.add(cname);
+			}
+			System.out.println(m_trainCounties.size() + " train county names are loaded!");
+			System.out.println(m_testCounties.size() + " test county names are loaded!");
+		} catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+	
+//	HashMap<Double, String> m_iatCountyMap = new HashMap<Double, String>();
+//	DecimalFormat m_df = new DecimalFormat("#.0000");
+//	public void buildIATMap(String filename, String att){
+//		try {
+//			File file = new File(filename);
+//			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+//			String line, countyID;			
+//			String[] strs;
+//
+//			// Skip the first line since it is user name.
+////			reader.readLine(); 
+//			int count = 0;
+//			double iat = 0;
+//			
+//			while((line = reader.readLine()) != null){
+//				strs = line.replaceAll("\\s", "").split(",");
+//				
+//				if(att.equals("imp"))
+//					iat = Double.valueOf(m_df.format(Double.valueOf(strs[3])));
+//				else if(att.equals("exp"))
+//					iat = Double.valueOf(m_df.format(Double.valueOf(strs[5])));
+//				else
+//					System.out.println("Attitude not supported!");
+//				
+//				countyID = findID(strs);
+//				if(!m_iatCountyMap.containsKey(iat)){
+//					count++;
+//					m_iatCountyMap.put(iat, countyID);
+//				} else
+//					System.out.println(countyID + " The same attitude value!");
+//			}
+//			System.out.println("the number of counties of iat score "+count);
+//			reader.close();
+//		} catch(IOException e){
+//			e.printStackTrace();
+//		}
+//	}
+//	public HashMap<Double, String> getIATMap(){
+//		return m_iatCountyMap;
+//	}
+//	ArrayList<String> m_counties = new ArrayList<String>();
+//	HashSet<String> m_sltCounties = new HashSet<String>();
+//	public void loadIATCounties(String filename, int k){
+//		try {
+//			File file = new File(filename);
+//			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+//			String line, countyID;			
+//			String[] strs;
+//
+//			// Skip the first line since it is user name.
 //			reader.readLine(); 
-			int count = 0;
-			double iat = 0;
-			
-			while((line = reader.readLine()) != null){
-				strs = line.replaceAll("\\s", "").split(",");
-				
-				if(att.equals("imp"))
-					iat = Double.valueOf(m_df.format(Double.valueOf(strs[3])));
-				else if(att.equals("exp"))
-					iat = Double.valueOf(m_df.format(Double.valueOf(strs[5])));
-				else
-					System.out.println("Attitude not supported!");
-				
-				countyID = findID(strs);
-				if(!m_iatCountyMap.containsKey(iat)){
-					count++;
-					m_iatCountyMap.put(iat, countyID);
-				} else
-					System.out.println(countyID + " The same attitude value!");
-			}
-			System.out.println("the number of counties of iat score "+count);
-			reader.close();
-		} catch(IOException e){
-			e.printStackTrace();
-		}
-	}
-	public HashMap<Double, String> getIATMap(){
-		return m_iatCountyMap;
-	}
-	ArrayList<String> m_counties = new ArrayList<String>();
-	HashSet<String> m_sltCounties = new HashSet<String>();
-	public void loadIATCounties(String filename, int k){
-		try {
-			File file = new File(filename);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-			String line, countyID;			
-			String[] strs;
-
-			// Skip the first line since it is user name.
-			reader.readLine(); 
-
-			while((line = reader.readLine()) != null){
-				strs = line.replaceAll("\\s", "").split(",");
-				countyID = findID(strs);
-				m_counties.add(countyID);
-			}
-			reader.close();
-		} catch(IOException e){
-			e.printStackTrace();
-		}
-		int idx = 0;
-		while(m_sltCounties.size() < k){
-			idx = (int)(Math.random()*m_counties.size());
-			m_sltCounties.add(m_counties.get(idx));
-		}
-	}
-	HashSet<String> tweetCounties = new HashSet<String>();
-	HashSet<String> iatCounties = new HashSet<String>();
-	public void saveTrainTestTweets(String folder, String suffix, String traindir, String testdir){
-		if(folder == null || folder.isEmpty())
-			return;
-		File dir = new File(folder);
-		String userID = "";
-		int trainCount = 0, testCount = 0;
-		try{			
-			for(File f: dir.listFiles()){
-				if(f.isFile() && f.getAbsolutePath().endsWith(suffix)){
-					userID  = extractUserID(f.getName());
-					tweetCounties.add(userID);
-					if(m_sltCounties.contains(userID)){
-						Files.copy(f.toPath(), new File(testdir+f.getName()).toPath());
-						testCount++;
-						if(testCount%10 == 0)
-							System.out.print("o");
-					} else{
-						Files.copy(f.toPath(), new File(traindir+f.getName()).toPath());
-						trainCount++;
-						if(trainCount%10 == 0)
-							System.out.print("x");
-					}	
-				} else{
-					System.out.println(f.getName());
-					System.out.println("Wrong format in saving training and testing tweets.");
-				}
-			}
-		} catch(IOException e){
-			e.printStackTrace();
-		}
-		
-	}
+//
+//			while((line = reader.readLine()) != null){
+//				strs = line.replaceAll("\\s", "").split(",");
+//				countyID = findID(strs);
+//				m_counties.add(countyID);
+//			}
+//			reader.close();
+//		} catch(IOException e){
+//			e.printStackTrace();
+//		}
+//		int idx = 0;
+//		while(m_sltCounties.size() < k){
+//			idx = (int)(Math.random()*m_counties.size());
+//			m_sltCounties.add(m_counties.get(idx));
+//		}
+//	}
+//	HashSet<String> tweetCounties = new HashSet<String>();
+//	HashSet<String> iatCounties = new HashSet<String>();
+//	public void saveTrainTestTweets(String folder, String suffix, String traindir, String testdir){
+//		if(folder == null || folder.isEmpty())
+//			return;
+//		File dir = new File(folder);
+//		String userID = "";
+//		int trainCount = 0, testCount = 0;
+//		try{			
+//			for(File f: dir.listFiles()){
+//				if(f.isFile() && f.getAbsolutePath().endsWith(suffix)){
+//					userID  = extractUserID(f.getName());
+//					tweetCounties.add(userID);
+//					if(m_sltCounties.contains(userID)){
+//						Files.copy(f.toPath(), new File(testdir+f.getName()).toPath());
+//						testCount++;
+//						if(testCount%10 == 0)
+//							System.out.print("o");
+//					} else{
+//						Files.copy(f.toPath(), new File(traindir+f.getName()).toPath());
+//						trainCount++;
+//						if(trainCount%10 == 0)
+//							System.out.print("x");
+//					}	
+//				} else{
+//					System.out.println(f.getName());
+//					System.out.println("Wrong format in saving training and testing tweets.");
+//				}
+//			}
+//		} catch(IOException e){
+//			e.printStackTrace();
+//		}
+//	}
 	public String findID(String[] strs){
 		// remove the left "
 		strs[0] = strs[0].substring(1, strs[0].length());
@@ -478,14 +506,11 @@ public class UserAnalyzer extends DocAnalyzer {
 			for(_User u: m_users){
 				writer.write("{");
 				double[] vct = demo ? formatEachUserDemo(u, att) : formatEachUser(u, att);
-				for(int i=0; i<vct.length; i++){
-					if(vct[i] != 0){
-						writer.write(String.format("%d %.4f", i, vct[i]));
-						if(i != vct.length-1)
-							writer.write(",");
-					}
-					
+				for(int i=0; i<vct.length-1; i++){
+					if(vct[i] != 0)
+						writer.write(String.format("%d %.4f,", i, vct[i]));
 				}
+				writer.write(String.format("%d %.4f", vct.length-1, vct[vct.length-1]));
 				writer.write("}\n");
 			}
 			writer.close();
@@ -493,20 +518,56 @@ public class UserAnalyzer extends DocAnalyzer {
 			e.printStackTrace();
 		}
 	}
-
-	public double[] formatEachUser(_User u, String att){
-		double[] vct = new double[getFeatureSize()+2];
-		for(_Review r: u.getReviews()){
-			for(_SparseFeature sf: r.getSparse()){
-				vct[sf.getIndex()+1] += sf.getValue();
-			}
+	
+	// the number of topics in our problem
+	int m_number_of_topics = 0;
+	public void setNumber4Topics(int nu){
+		m_number_of_topics = nu;
+	}
+	// Generate train and test files with the topic models.
+	public void generateTopicArffData(String train, String test, String att, boolean demo){
+		ArrayList<_User> trainUsers = new ArrayList<_User>();
+		ArrayList<_User> testUsers = new ArrayList<_User>();
+		for(_User u: m_users){
+			if(m_testCounties.contains(u.getUserID()))
+				testUsers.add(u);
+			else
+				trainUsers.add(u);
 		}
-		Utils.L2Normalization(vct);
-		if(att.equals("imp"))
-			vct[vct.length-1] = u.getImpScore();
-		else if(att.equals("exp"))
-			vct[vct.length-1] = u.getExpScore();
-		return vct;
+		generateOneTopicArffData(trainUsers, train, att, demo);
+		generateOneTopicArffData(testUsers, test, att, demo);
+	}
+
+// Generate the topic vectors in arff format for linear regression.
+	public void generateOneTopicArffData(ArrayList<_User> users, String filename, String att, boolean demo){
+		PrintWriter writer;
+		try{
+			writer = new PrintWriter(new File(filename));
+			writer.write(String.format("@RELATION %s\n", extractRelation(filename)));
+			for(int i=0; i<m_number_of_topics; i++){
+				writer.write(String.format("@ATTRIBUTE topic_%d\tNUMERIC\n", i));
+			}
+			if(demo){
+				for(String s: m_demos)
+					writer.write(String.format("@ATTRIBUTE %s\tNUMERIC\n", s));
+			}
+			writer.write("@ATTRIBUTE ylabel\tNUMERIC\n\n@Data\n");
+			for(_User u: users){
+				writer.write("{");
+				double[] vct = demo ? formatEachUserTopicDemo(u, att) : formatEachUserTopic(u, att);
+				for(int i=0; i<vct.length; i++){
+					if(vct[i] != 0){
+						writer.write(String.format("%d %.4f", i, vct[i]));
+						if(i != vct.length-1)
+							writer.write(",");
+					}
+				}
+				writer.write("}\n");
+			}
+			writer.close();
+		} catch(IOException e){
+			e.printStackTrace();
+		}
 	}
 	
 	public void selectFeatures(double[] coef, int k, String filename){
@@ -546,8 +607,21 @@ public class UserAnalyzer extends DocAnalyzer {
 		for(String s: m_featureNames)
 			System.out.print(s+",");
 	}
-	
-	// With demographics
+	// Format the user tweets with/without demo
+	public double[] formatEachUser(_User u, String att){
+		double[] vct = new double[getFeatureSize()+2];
+		for(_Review r: u.getReviews()){
+			for(_SparseFeature sf: r.getSparse()){
+				vct[sf.getIndex()+1] += sf.getValue();
+			}
+		}
+		Utils.L2Normalization(vct);
+		if(att.equals("imp"))
+			vct[vct.length-1] = u.getImpScore();
+		else if(att.equals("exp"))
+			vct[vct.length-1] = u.getExpScore();
+		return vct;
+	}
 	public double[] formatEachUserDemo(_User u, String att){
 		double[] vct = new double[getFeatureSize()+10];// 8 features for demo
 		for(_Review r: u.getReviews()){
@@ -566,49 +640,90 @@ public class UserAnalyzer extends DocAnalyzer {
 			vct[vct.length-1] = u.getExpScore();
 		return vct;
 	}
-	
-	// Save the IAT files into train/test files.
-	public void saveTrainTestIAT(String iat, String trainIAT, String testIAT){
-		try {
-			File file = new File(iat);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-			String line, countyID;			
-			String[] strs;
-			ArrayList<String> train = new ArrayList<String>();
-			ArrayList<String> test = new ArrayList<String>();
-			// Skip the first line since it is user name.
-			reader.readLine(); 
-
-			while((line = reader.readLine()) != null){
-				strs = line.replaceAll("\\s", "").split(",");
-				countyID = findID(strs);
-				iatCounties.add(countyID);
-				if(m_sltCounties.contains(countyID))
-					test.add(line);
-				else
-					train.add(line);
+	// Format the user topic vector with/without demo
+	public double[] formatEachUserTopic(_User u, String att){
+		double[] vct = new double[m_number_of_topics+1];
+		if(u.getReviews().size() == 1){
+			_Review r = u.getReviews().get(0);
+			double[] topics = r.getTopics();
+			for(int i=0; i< topics.length; i++){
+				vct[i] = topics[i];
 			}
-			reader.close();
-			int count = 0;
-			for(String ic: iatCounties){
-				if(tweetCounties.contains(ic))
-					count++;
-				else
-					System.out.println(ic + " is missing.");
-			}
-			System.out.println(count);
-			// write out the train iats.
-			PrintWriter writer = new PrintWriter(new File(trainIAT));
-			for(String s: train)
-				writer.write(s+"\n");
-			writer.close();
-			// writer out the test iats.
-			writer = new PrintWriter(new File(testIAT));
-			for(String s: test)
-				writer.write(s+"\n");
-			writer.close();
-		} catch(IOException e){
-			e.printStackTrace();
+		} else{
+			System.err.println("Wrong review size for each county!");
 		}
+		if(att.equals("imp"))
+			vct[vct.length-1] = u.getImpScore();
+		else if(att.equals("exp"))
+			vct[vct.length-1] = u.getExpScore();
+		return vct;
 	}
+	// With demographics
+	public double[] formatEachUserTopicDemo(_User u, String att){
+		double[] vct = new double[getFeatureSize()+9];// 8 features for demo
+		if(u.getReviews().size() == 1){
+			_Review r = u.getReviews().get(0);
+			double[] topics = r.getTopics();
+			for(int i=0; i< topics.length; i++){
+				vct[i] = topics[i];
+			}
+		} else{
+			System.err.println("Wrong review size for each county!");
+		}
+		double[] demo = u.getDemographics();
+		for(int i=0; i<demo.length; i++){
+			vct[m_number_of_topics + i] = demo[i];
+		}
+		Utils.L2Normalization(vct);
+		if(att.equals("imp"))
+			vct[vct.length-1] = u.getImpScore();
+		else if(att.equals("exp"))
+			vct[vct.length-1] = u.getExpScore();
+		return vct;
+	}
+	
+//	// Save the IAT files into train/test files.
+//	public void saveTrainTestIAT(String iat, String trainIAT, String testIAT){
+//		try {
+//			File file = new File(iat);
+//			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+//			String line, countyID;			
+//			String[] strs;
+//			ArrayList<String> train = new ArrayList<String>();
+//			ArrayList<String> test = new ArrayList<String>();
+//			// Skip the first line since it is user name.
+//			reader.readLine(); 
+//
+//			while((line = reader.readLine()) != null){
+//				strs = line.replaceAll("\\s", "").split(",");
+//				countyID = findID(strs);
+//				iatCounties.add(countyID);
+//				if(m_sltCounties.contains(countyID))
+//					test.add(line);
+//				else
+//					train.add(line);
+//			}
+//			reader.close();
+//			int count = 0;
+//			for(String ic: iatCounties){
+//				if(tweetCounties.contains(ic))
+//					count++;
+//				else
+//					System.out.println(ic + " is missing.");
+//			}
+//			System.out.println(count);
+//			// write out the train iats.
+//			PrintWriter writer = new PrintWriter(new File(trainIAT));
+//			for(String s: train)
+//				writer.write(s+"\n");
+//			writer.close();
+//			// writer out the test iats.
+//			writer = new PrintWriter(new File(testIAT));
+//			for(String s: test)
+//				writer.write(s+"\n");
+//			writer.close();
+//		} catch(IOException e){
+//			e.printStackTrace();
+//		}
+//	}
 }

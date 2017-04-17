@@ -145,7 +145,7 @@ public class MultiThreadedUserAnalyzer extends UserAnalyzer {
 			if(tweets.size() > 1){//at least one for adaptation and one for testing
 				synchronized (m_allocReviewLock) {
 					_User cur = new _User(countyID, m_classNo, tweets);
-					m_countyNameTweetsMap.put(countyID, cur);
+					m_countyIDUserMap.put(countyID, cur);
 					m_users.add(cur); //create new user from the file.				}
 				}
 			} else if(tweets.size() == 1){// added by Lin, for those users with fewer than 2 reviews, ignore them.

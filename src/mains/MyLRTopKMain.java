@@ -23,6 +23,7 @@ import Analyzer.CrossFeatureSelection;
 import Analyzer.MultiThreadedUserAnalyzer;
 import Analyzer.UserAnalyzer;
 import Classifier.supervised.GlobalSVM;
+import Classifier.supervised.IncidentPrediction;
 import Classifier.supervised.SVM;
 import Classifier.supervised.modelAdaptation.HDP.MTCLRWithHDP;
 
@@ -38,18 +39,18 @@ public class MyLRTopKMain {
 			String tokenModel = "./data/Model/en-token.bin"; // Token model.
 			String stopwords = "./data/Model/stopwords.dat";
 			
-			int k = 21;
+			int k = 2000;
 //			String prefix = "/if15/lg5bt/DSIData";//"./data"
 			String prefix = "./data";
 			
 			String data = "geo";
-			String fv = "seed";
+			String fv = "toplr";
 			String type = "black";// "black" or "gay"
 			String suffix = ".csv";
 			boolean demo = false;// whether we include the demo in the training.
 			String att = "imp";// "exp"
 			String tweetTrain = String.format("%s/%s/tweetSplit/tweetsTrain/", prefix, data);
-			String tweetTest = String.format("%s/%s/tweetSplit/tweetsTest/", prefix, data);
+			String tweetTest = String.format("%s/%s/tweetSplit/tweetsDebug/", prefix, data);
 						
 			String trainIAT = String.format("%s/%s/%sTrainIAT.csv", prefix, data, type);
 			String testIAT = String.format("%s/%s/%sTestIAT.csv", prefix, data, type);
@@ -57,7 +58,7 @@ public class MyLRTopKMain {
 			String features = String.format("%s/%s/%s_%s_%d_%s.txt", prefix, data, type, fv, k, att);
 			String trainFile = String.format("%s/%s/ArffData/%s_train_%s_%s_%d_demo_%b.arff", prefix, data, type, att, fv, k, demo);	
 			String testFile = String.format("%s/%s/ArffData/%s_test_%s_%s_%d_demo_%b.arff", prefix, data, type, att, fv, k, demo);
-				
+			String modelFile = String.format("%s/%s/ArffData/%s_test_%s_%s_%d_demo_%b.arff", prefix, data, type, att, fv, k, demo);
 			System.out.print(String.format("[Info]k:%d,data:%s,fv:%s,type:%s,demo:%b,att:%s\n",k,data,fv,type,demo,att));
 			/***Generate training Arff files based on the selected features.***/
 			System.out.println(String.format("Start generating %s training tweets....", type));
@@ -67,6 +68,17 @@ public class MyLRTopKMain {
 			train_analyzer.loadIAT(trainIAT);
 			train_analyzer.setFeatureValues("TFIDF", 2);
 			train_analyzer.generateArffData(trainFile, att, demo);
+			
+//			try{
+//				/***Implicit attitudes.****/
+//				LinearRegression lr = new LinearRegression();
+//				System.out.println(String.format("Start loading %s training data from %s....", type, trainFile));
+//				BufferedReader trainReader = new BufferedReader(new FileReader(trainFile));
+//				Instances train = new Instances(trainReader);
+//				train.setClassIndex(train.numAttributes() - 1);
+//				System.out.print("Total number of attributes is "+train.numAttributes());
+//				lr.buildClassifier(train);
+
 			
 //			/***Generate testing Arff files based on the selected features.***/
 //			System.out.println(String.format("Start generating %s testing tweets....", type));
@@ -86,9 +98,8 @@ public class MyLRTopKMain {
 //			Evaluation eval = new Evaluation(train);
 //			eval.evaluateModel(lr, test);
 //			System.out.println(eval.toSummaryString(String.format("\nResults For %s Attitudes\n======\n", att), false));
-
-		} catch(Exception e1){
-			e1.printStackTrace();
+		} catch (IOException e){
+			e.printStackTrace();
 		}
 	}
 }

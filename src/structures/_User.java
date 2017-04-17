@@ -58,6 +58,21 @@ public class _User {
 		m_perfStat = new _PerformanceStat(classNo);
 	}
 	
+	public _User(String userID, int classNo, _Review review){
+		m_userID = userID;
+		// The user only have one review because they are aggregated.
+		m_reviews = new ArrayList<_Review>();
+		m_reviews.add(review);
+		m_classNo = classNo;
+
+		m_lowDimProfile = null;
+		m_BoWProfile = null;
+		m_pWeight = null;
+		m_perfStat = new _PerformanceStat(classNo);
+		
+		constructSparseVector();
+		calcPosRatio();
+	}
 	public _User(String userID, int classNo, ArrayList<_Review> reviews){
 		m_userID = userID;
 		m_reviews = reviews;

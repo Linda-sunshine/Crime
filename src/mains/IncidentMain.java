@@ -77,12 +77,12 @@ public class IncidentMain {
 		// generate gay implicit test data
 		gayImpAnalyzer.loadUserDir(tweetTest, suffix);
 		gayImpAnalyzer.setFeatureValues("TFIDF", 2);
-		gayImpAnalyzer.generateArffData(blackImpTestArff, "imp", demo);
+		gayImpAnalyzer.generateArffData(gayImpTestArff, "imp", demo);
 		
 		// generate gay explicit test data
 		gayExpAnalyzer.loadUserDir(tweetTest, suffix);
 		gayExpAnalyzer.setFeatureValues("TFIDF", 2);
-		gayExpAnalyzer.generateArffData(blackExpTestArff, "exp", demo);
+		gayExpAnalyzer.generateArffData(gayExpTestArff, "exp", demo);
 	
 		/***Load learned model weights from files.***/
 		// load the weights for black implicit attitude.

@@ -19,6 +19,7 @@ public class IncidentPrediction {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF-8"));
 			String line;
 			ArrayList<Double> ws = new ArrayList<Double>();
+//			line = reader.readLine();
 			while ((line = reader.readLine()) != null) {
 				ws.add(Double.valueOf(line));
 			}
@@ -30,6 +31,10 @@ public class IncidentPrediction {
 		} catch (IOException e) {
 			System.err.format("[Error]Failed to open file %s!!", filename);
 		}
+	}
+	
+	public void setWeights(double[] weights){
+		m_weights = weights;
 	}
 	
 	// The prediction function with given model weights. 

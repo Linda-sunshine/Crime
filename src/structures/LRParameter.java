@@ -2,6 +2,7 @@ package structures;
 
 public class LRParameter {
 	public String m_data = "geo";
+//	public String m_prefix = "/if15/lg5bt/DSIData";
 	public String m_prefix = "./data";
 	public String m_type = "black";
 	public String m_fv = "toplr";//"df"
@@ -10,6 +11,7 @@ public class LRParameter {
 	public boolean m_demo = false;
 	public String m_suffix = ".csv";
 	public String m_test = "./data/geo/tweetSplit/tweetsTest/";
+	public int m_number_of_topics = 30;
 
 //	public int m_userSet = 10; // The set of users we want to use.
 //	public int m_ttlSizeSet = 24; // The total number of sizes.
@@ -44,6 +46,8 @@ public class LRParameter {
 				m_demo = Boolean.valueOf(argv[i]);
 			else if (argv[i-1].equals("-test"))
 				m_test = argv[i];
+			else if (argv[i-1].equals("-nuTopic"))
+				m_number_of_topics = Integer.parseInt(argv[i]);
 			else
 				exit_with_help();
 		}

@@ -1,0 +1,6 @@
+#!/bin/sh
+for att in imp exp 
+	do for t in 30 50 70 90 
+		do ./run -prefix "./data" -type black -fv df -k 2000 -att $att -nuTopic $t
+	done
+done
