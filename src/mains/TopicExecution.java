@@ -33,7 +33,7 @@ public class TopicExecution {
 			String suffix = ".csv";
 				
 			String testCounties = "./countyIndex.txt";
-			String tweetDir = String.format("%s/%s/tweetsLight/", param.m_prefix, param.m_data);
+			String tweetDir = String.format("%s/%s/tweets/", param.m_prefix, param.m_data);
 			String iat = String.format("%s/%s_IAT.csv", param.m_prefix, param.m_type);
 			String features = String.format("%s/%s/%s_%s_%d_%s.txt", param.m_prefix, param.m_data, param.m_type, param.m_fv, param.m_k, param.m_att);
 				

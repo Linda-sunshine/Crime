@@ -466,6 +466,7 @@ public class DocAnalyzer extends Analyzer {
 //			tokens[i] = SnowballStemming(Normalize(tokens[i]));
 //		
 //		String fv = tokens[0];
+//		System.out.print(fv+" ");
 //		if(!m_featureNameIndex.containsKey(fv)){
 //			m_featureNameIndex.put(fv, m_featureNames.size()); // set the index of the new feature.
 //			m_featureNames.add(fv); // Add the new feature.

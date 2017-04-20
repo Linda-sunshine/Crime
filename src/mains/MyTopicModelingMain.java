@@ -97,10 +97,11 @@ public class MyTopicModelingMain {
 				System.out.println("The selected topic model has not developed yet!");
 				return;
 			}
-			
+			String aspectList = String.format("./data/Model/%s_aspect.txt", type);
 			tModel.setDisplayLap(0);
 			tModel.setSentiAspectPrior(aspectSentiPrior);
 			tModel.setInforWriter(String.format("../dsiData/%s_%s_%d_topic_%d_att_%s_demo_%b.txt", type, fv, k, number_of_topics, att, demo));
+			tModel.LoadPrior(aspectList, eta);
 			tModel.EMonCorpus();	
 			tModel.printTopWords(30);
 			

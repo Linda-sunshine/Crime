@@ -45,7 +45,7 @@ public class MyLRTopKMain {
 			
 			String data = "geo";
 			String fv = "toplr";
-			String type = "black";// "black" or "gay"
+			String type = "gay";// "black" or "gay"
 			String suffix = ".csv";
 			boolean demo = false;// whether we include the demo in the training.
 			String att = "imp";// "exp"
